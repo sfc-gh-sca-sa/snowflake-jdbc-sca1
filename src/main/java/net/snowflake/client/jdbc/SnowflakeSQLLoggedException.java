@@ -16,6 +16,7 @@ import net.snowflake.client.jdbc.telemetry.TelemetryField;
 import net.snowflake.client.jdbc.telemetry.TelemetryUtil;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryEvent;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryService;
+import net.snowflake.common.core.LoginInfoDTO;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,6 +44,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
   private Telemetry ibInstance = null;
 
   private static final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
+
 
   /**
    * Function to create a TelemetryEvent log from the JSONObject and exception and send it via OOB
@@ -97,20 +99,23 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
   private JSONObject createOOBValue(
       String queryId, String reason, String SQLState, int vendorCode, ErrorCode errorCode) {
     JSONObject oobValue = new JSONObject();
+    oobValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
+    oobValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
+    oobValue.put("DriverVersion", SnowflakeDriver.implementVersion);
     if (!Strings.isNullOrEmpty(queryId)) {
-      oobValue.put("Query ID", queryId);
+      oobValue.put("QueryID", queryId);
     }
     if (!Strings.isNullOrEmpty(SQLState)) {
       oobValue.put("SQLState", SQLState);
     }
-    if (vendorCode != -1) {
-      oobValue.put("Vendor Code", vendorCode);
-    }
-    if (errorCode != null) {
-      oobValue.put("Error Code", errorCode.toString());
-    }
     if (!Strings.isNullOrEmpty(reason)) {
       oobValue.put("reason", reason);
+    }
+    if (vendorCode != -1) {
+      oobValue.put("ErrorNumber", vendorCode);
+    }
+    if (errorCode != null) {
+      oobValue.put("ErrorType", errorCode.toString());
     }
     return oobValue;
   }
@@ -143,6 +148,8 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     if (ibInstance != null) {
       ObjectNode ibValue = mapper.createObjectNode();
       ibValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
+      ibValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
+      ibValue.put("DriverVersion", SnowflakeDriver.implementVersion);
       if (!Strings.isNullOrEmpty(queryId)) {
         ibValue.put("QueryID", queryId);
       }
@@ -156,7 +163,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
         ibValue.put("ErrorNumber", vendorCode);
       }
       if (errorCode != null) {
-        ibValue.put("ErrorMessage", errorCode.toString());
+        ibValue.put("ErrorType", errorCode.toString());
       }
       // try  to send in-band data asynchronously
       ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
