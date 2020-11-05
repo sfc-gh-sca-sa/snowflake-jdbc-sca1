@@ -17,9 +17,12 @@ import net.snowflake.client.jdbc.telemetry.TelemetryUtil;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryEvent;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryService;
 import net.snowflake.common.core.LoginInfoDTO;
+import net.snowflake.common.core.SqlState;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -33,15 +36,6 @@ import java.util.concurrent.TimeUnit;
  *     exception with OOB telemetry.
  */
 public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
-  /*
-  OOB telemetry instance
-   */
-  private TelemetryService oobInstance = TelemetryService.getInstance();
-
-  /*
-  IB telemtry instance
-   */
-  private Telemetry ibInstance = null;
 
   private static final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
@@ -54,13 +48,14 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    *     that should be included in the telemetry data, such as sqlState or vendorCode
    * @param ex The exception being thrown
    */
-  private void sendOutOfBandTelemetryMessage(JSONObject value, SnowflakeSQLLoggedException ex) {
+  private static void sendOutOfBandTelemetryMessage(JSONObject value, SQLException ex, TelemetryService oobInstance) {
     TelemetryEvent.LogBuilder logBuilder = new TelemetryEvent.LogBuilder();
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     ex.printStackTrace(pw);
     String stackTrace = sw.toString();
     value.put("Stacktrace", stackTrace);
+    value.put("Exception", ex.getClass().getSimpleName());
     TelemetryEvent log =
         logBuilder.withName("Exception: " + ex.getClass().getSimpleName()).withValue(value).build();
     oobInstance.report(log);
@@ -74,8 +69,8 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param ex The exception being thrown
    * @return true if in-band telemetry log sent successfully or false if it did not
    */
-  private Future<Boolean> sendInBandTelemetryMessage(
-      ObjectNode value, SnowflakeSQLLoggedException ex) {
+  private static Future<Boolean> sendInBandTelemetryMessage(
+          ObjectNode value, SQLException ex, Telemetry ibInstance) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     ex.printStackTrace(pw);
@@ -96,8 +91,8 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param errorCode
    * @return JSONObject with data about SQLException
    */
-  private JSONObject createOOBValue(
-      String queryId, String reason, String SQLState, int vendorCode, ErrorCode errorCode) {
+  private static JSONObject createOOBValue(
+          String queryId, String reason, String SQLState, int vendorCode, ErrorCode errorCode) {
     JSONObject oobValue = new JSONObject();
     oobValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
     oobValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
@@ -132,13 +127,15 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param session session object, which is needed to send in-band telemetry but not oob. Might be
    *     null, in which case oob is used.
    */
-  public void sendTelemetryData(
+  public static void sendTelemetryData(
       String queryId,
       String reason,
       String SQLState,
       int vendorCode,
       ErrorCode errorCode,
-      SFSession session) {
+      SFSession session,
+      SQLException ex) {
+    Telemetry ibInstance = null;
     // if session is not null, try sending data using in-band telemetry
     if (session != null) {
       ibInstance = session.getTelemetryClient();
@@ -167,10 +164,11 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
       }
       // try  to send in-band data asynchronously
       ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
+      Telemetry finalIbInstance = ibInstance;
       threadExecutor.submit(
           () -> {
             boolean inBandSuccess;
-            Future<Boolean> sendInBand = sendInBandTelemetryMessage(ibValue, this);
+            Future<Boolean> sendInBand = sendInBandTelemetryMessage(ibValue, ex, finalIbInstance);
             // record whether in band telemetry message sent with boolean value inBandSuccess
             try {
               inBandSuccess = sendInBand.get(10, TimeUnit.SECONDS);
@@ -183,31 +181,31 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
                   "In-band telemetry message failed to send. Sending out-of-band message instead");
               JSONObject oobValue =
                   createOOBValue(queryId, reason, SQLState, vendorCode, errorCode);
-              sendOutOfBandTelemetryMessage(oobValue, this);
+              sendOutOfBandTelemetryMessage(oobValue, ex, TelemetryService.getInstance());
             }
           });
     }
     // In-band is not possible so send OOB telemetry instead
     else {
       JSONObject oobValue = createOOBValue(queryId, reason, SQLState, vendorCode, errorCode);
-      sendOutOfBandTelemetryMessage(oobValue, this);
+      sendOutOfBandTelemetryMessage(oobValue, ex, TelemetryService.getInstance());
     }
   }
 
   public SnowflakeSQLLoggedException(
       SFSession session, String reason, String SQLState, int vendorCode, String queryId) {
     super(queryId, reason, SQLState, vendorCode);
-    sendTelemetryData(queryId, reason, SQLState, vendorCode, null, session);
+    sendTelemetryData(queryId, reason, SQLState, vendorCode, null, session, this);
   }
 
   public SnowflakeSQLLoggedException(SFSession session, int vendorCode, String SQLState) {
     super(SQLState, vendorCode);
-    sendTelemetryData(null, null, SQLState, vendorCode, null, session);
+    sendTelemetryData(null, null, SQLState, vendorCode, null, session, this);
   }
 
   public SnowflakeSQLLoggedException(SFSession session, String SQLState, String reason) {
     super(reason, SQLState);
-    sendTelemetryData(null, reason, SQLState, -1, null, session);
+    sendTelemetryData(null, reason, SQLState, -1, null, session, this);
   }
 
   public SnowflakeSQLLoggedException(
@@ -215,7 +213,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     super(SQLState, vendorCode, params);
     String reason =
         errorResourceBundleManager.getLocalizedMessage(String.valueOf(vendorCode), params);
-    sendTelemetryData(null, reason, SQLState, vendorCode, null, session);
+    sendTelemetryData(null, reason, SQLState, vendorCode, null, session, this);
   }
 
   public SnowflakeSQLLoggedException(
@@ -226,7 +224,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
         errorResourceBundleManager.getLocalizedMessage(
             String.valueOf(errorCode.getMessageCode()), params);
     sendTelemetryData(
-        null, reason, errorCode.getSqlState(), errorCode.getMessageCode(), errorCode, session);
+        null, reason, errorCode.getSqlState(), errorCode.getMessageCode(), errorCode, session, this);
   }
 
   public SnowflakeSQLLoggedException(
@@ -235,7 +233,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     // add telemetry
     String reason =
         errorResourceBundleManager.getLocalizedMessage(String.valueOf(vendorCode), params);
-    sendTelemetryData(null, reason, SQLState, vendorCode, null, session);
+    sendTelemetryData(null, reason, SQLState, vendorCode, null, session, this);
   }
 
   public SnowflakeSQLLoggedException(SFSession session, ErrorCode errorCode, Object... params) {
@@ -244,17 +242,27 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     String reason =
         errorResourceBundleManager.getLocalizedMessage(
             String.valueOf(errorCode.getMessageCode()), params);
-    sendTelemetryData(null, reason, null, -1, errorCode, session);
+    sendTelemetryData(null, reason, null, -1, errorCode, session, this);
   }
 
   public SnowflakeSQLLoggedException(SFSession session, SFException e) {
     super(e);
     // add telemetry
-    sendTelemetryData(null, null, null, -1, null, session);
+    sendTelemetryData(null, null, null, -1, null, session, this);
   }
 
   public SnowflakeSQLLoggedException(SFSession session, String reason) {
     super(reason);
-    sendTelemetryData(null, reason, null, -1, null, session);
+    sendTelemetryData(null, reason, null, -1, null, session, this);
+  }
+
+  public static void logSqlFeatureNotSupportedException(SFSession session) {
+    sendTelemetryData(
+        null,
+        "API call to unsupported JDBC function",
+        SqlState.FEATURE_NOT_SUPPORTED,
+        -1,
+        null,
+        session, new SQLFeatureNotSupportedException());
   }
 }

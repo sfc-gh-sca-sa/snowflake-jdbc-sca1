@@ -4,6 +4,11 @@
 
 package net.snowflake.client.jdbc;
 
+import net.snowflake.client.core.SFSession;
+import net.snowflake.client.log.SFLogger;
+import net.snowflake.client.log.SFLoggerFactory;
+import net.snowflake.common.core.SqlState;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -14,9 +19,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import net.snowflake.client.log.SFLogger;
-import net.snowflake.client.log.SFLoggerFactory;
-import net.snowflake.common.core.SqlState;
 
 /** Base class for query result set and metadata result set */
 abstract class SnowflakeBaseResultSet implements ResultSet {
@@ -30,12 +32,14 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   protected SnowflakeResultSetMetaDataV1 resultSetMetaData = null;
   protected Map<String, Object> parameters = new HashMap<>();
   private int fetchSize = 0;
+  private SFSession session = null;
 
   SnowflakeBaseResultSet(Statement statement) throws SQLException {
     this.statement = statement;
     this.resultSetType = statement.getResultSetType();
     this.resultSetConcurrency = statement.getResultSetConcurrency();
     this.resultSetHoldability = statement.getResultSetHoldability();
+    this.session = statement.unwrap(SnowflakeStatementV1.class).connection.getSfSession();
   }
 
   /**
@@ -107,7 +111,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   @Override
   public InputStream getAsciiStream(int columnIndex) throws SQLException {
     logger.debug("public InputStream getAsciiStream(int columnIndex)");
-
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
