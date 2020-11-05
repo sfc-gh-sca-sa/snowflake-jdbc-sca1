@@ -7,12 +7,6 @@ package net.snowflake.client.jdbc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.util.Strings;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import net.minidev.json.JSONObject;
 import net.snowflake.client.core.ObjectMapperFactory;
 import net.snowflake.client.core.SFException;
@@ -22,6 +16,13 @@ import net.snowflake.client.jdbc.telemetry.TelemetryField;
 import net.snowflake.client.jdbc.telemetry.TelemetryUtil;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryEvent;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryService;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author mknister
@@ -143,19 +144,19 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
       ObjectNode ibValue = mapper.createObjectNode();
       ibValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
       if (!Strings.isNullOrEmpty(queryId)) {
-        ibValue.put("Query ID", queryId);
+        ibValue.put("QueryID", queryId);
       }
       if (!Strings.isNullOrEmpty(SQLState)) {
         ibValue.put("SQLState", SQLState);
       }
-      if (vendorCode != -1) {
-        ibValue.put("Vendor Code", vendorCode);
-      }
-      if (errorCode != null) {
-        ibValue.put("Error Code", errorCode.toString());
-      }
       if (!Strings.isNullOrEmpty(reason)) {
         ibValue.put("reason", reason);
+      }
+      if (vendorCode != -1) {
+        ibValue.put("ErrorNumber", vendorCode);
+      }
+      if (errorCode != null) {
+        ibValue.put("ErrorMessage", errorCode.toString());
       }
       // try  to send in-band data asynchronously
       ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
