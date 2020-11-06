@@ -47,6 +47,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param value JSONnode containing relevant information specific to the exception constructor
    *     that should be included in the telemetry data, such as sqlState or vendorCode
    * @param ex The exception being thrown
+   * @param oobInstance Out of band telemetry instance through which log will be passed
    */
   private static void sendOutOfBandTelemetryMessage(JSONObject value, SQLException ex, TelemetryService oobInstance) {
     TelemetryEvent.LogBuilder logBuilder = new TelemetryEvent.LogBuilder();
@@ -67,6 +68,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param value ObjectNode containing information specific to the exception constructor that
    *     should be included in the telemetry log, such as SQLState or reason for the error
    * @param ex The exception being thrown
+   * @param ibInstance Telemetry instance through which telemetry log will be sent
    * @return true if in-band telemetry log sent successfully or false if it did not
    */
   private static Future<Boolean> sendInBandTelemetryMessage(
@@ -91,7 +93,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param errorCode
    * @return JSONObject with data about SQLException
    */
-  private static JSONObject createOOBValue(
+  static JSONObject createOOBValue(
           String queryId, String reason, String SQLState, int vendorCode, ErrorCode errorCode) {
     JSONObject oobValue = new JSONObject();
     oobValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
@@ -116,6 +118,40 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
   }
 
   /**
+   * Helper function to create ObjectNode for IB telemetry log
+   * @param queryId
+   * @param reason
+   * @param SQLState
+   * @param vendorCode
+   * @param errorCode
+   * @return
+   */
+  static ObjectNode createIBValue(String queryId, String reason, String SQLState, int vendorCode,
+                                          ErrorCode errorCode)
+  {
+    ObjectNode ibValue = mapper.createObjectNode();
+    ibValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
+    ibValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
+    ibValue.put("DriverVersion", SnowflakeDriver.implementVersion);
+    if (!Strings.isNullOrEmpty(queryId)) {
+      ibValue.put("QueryID", queryId);
+    }
+    if (!Strings.isNullOrEmpty(SQLState)) {
+      ibValue.put("SQLState", SQLState);
+    }
+    if (!Strings.isNullOrEmpty(reason)) {
+      ibValue.put("reason", reason);
+    }
+    if (vendorCode != -1) {
+      ibValue.put("ErrorNumber", vendorCode);
+    }
+    if (errorCode != null) {
+      ibValue.put("ErrorType", errorCode.toString());
+    }
+    return ibValue;
+  }
+
+  /**
    * Function to construct log data based on possible exception inputs and send data through in-band
    * telemetry, or oob if in-band does not work
    *
@@ -126,6 +162,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param errorCode error code
    * @param session session object, which is needed to send in-band telemetry but not oob. Might be
    *     null, in which case oob is used.
+   * @param ex Exception object
    */
   public static void sendTelemetryData(
       String queryId,
@@ -143,25 +180,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     // if in-band instance is successfully created, compile sql exception data into an in-band
     // telemetry log
     if (ibInstance != null) {
-      ObjectNode ibValue = mapper.createObjectNode();
-      ibValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
-      ibValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
-      ibValue.put("DriverVersion", SnowflakeDriver.implementVersion);
-      if (!Strings.isNullOrEmpty(queryId)) {
-        ibValue.put("QueryID", queryId);
-      }
-      if (!Strings.isNullOrEmpty(SQLState)) {
-        ibValue.put("SQLState", SQLState);
-      }
-      if (!Strings.isNullOrEmpty(reason)) {
-        ibValue.put("reason", reason);
-      }
-      if (vendorCode != -1) {
-        ibValue.put("ErrorNumber", vendorCode);
-      }
-      if (errorCode != null) {
-        ibValue.put("ErrorType", errorCode.toString());
-      }
+      ObjectNode ibValue = createIBValue(queryId, reason, SQLState, vendorCode, errorCode);
       // try  to send in-band data asynchronously
       ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
       Telemetry finalIbInstance = ibInstance;
