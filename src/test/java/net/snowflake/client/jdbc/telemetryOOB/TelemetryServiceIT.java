@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 import net.snowflake.client.category.TestCategoryCore;
 import net.snowflake.client.core.SFSession;
@@ -240,6 +242,32 @@ public class TelemetryServiceIT extends BaseJDBCTest {
   }
 
   /**
+   * Test case for checking telemetry message for SqlFeatureNotSupportedExceptions. Assert that
+   * telemetry OOB endpoint is reached after a SnowflakeSQLLoggedException is thrown.
+   *
+   * <p>After running test, check for result in client_telemetry_oob table with type
+   * client_sql_exception.
+   *
+   * @throws SQLException
+   */
+  @Test
+  public void testSQLFeatureNotSupportedOOBTelemetry() throws SQLException, InterruptedException {
+    // with null session, OOB telemetry will be thrown
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(null);
+
+    // since it returns normal response,
+    // the telemetry does not create new event
+    Thread.sleep(WAIT_FOR_TELEMETRY_REPORT_IN_MILLISECS);
+    if (TelemetryService.getInstance().isDeploymentEnabled()) {
+      assertThat(
+          "Telemetry event has not been reported successfully. Error: "
+              + TelemetryService.getInstance().getLastClientError(),
+          TelemetryService.getInstance().getClientFailureCount(),
+          equalTo(0));
+    }
+  }
+
+  /**
    * Test case for checking telemetry message for SnowflakeSQLExceptions. In-band telemetry should
    * be used.
    *
@@ -256,6 +284,32 @@ public class TelemetryServiceIT extends BaseJDBCTest {
     } catch (SnowflakeSQLLoggedException e) {
       // The error response has the same code as the fakeErrorCode
       assertThat("Communication error", e.getErrorCode(), equalTo(fakeErrorCode));
+    }
+  }
+
+  /**
+   * Test case for checking telemetry message for SnowflakeFeatureNotSupporteExceptions. In-band
+   * telemetry should be used. After running test, check for telemetry message in client_telemetry_v
+   * table.
+   *
+   * <p>Test is ignored because since responses are immediately sent asynchronously (before
+   * execution stops due to sqlexception being thrown) instead of being stored for awhile, it's
+   * difficult to pull out the telemetry logs and look at them before they're sent.
+   *
+   * @throws SQLException
+   */
+  @Ignore
+  @Test
+  public void testSqlFeatureNotSupportedExceptionIBTelemetry() throws SQLException {
+    // make a connection to initialize telemetry instance
+    Connection con = getConnection();
+    Statement statement = con.createStatement();
+    try {
+      statement.execute("select 1", new int[] {});
+      fail();
+    } catch (SQLFeatureNotSupportedException e) {
+      // Expect SQLFeatureNotSupported message with telemetry exception thrown. Has no codes or
+      // sqlstate
     }
   }
 }

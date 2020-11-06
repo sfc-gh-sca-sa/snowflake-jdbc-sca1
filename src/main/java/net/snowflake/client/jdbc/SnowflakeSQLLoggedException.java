@@ -280,6 +280,12 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     sendTelemetryData(null, reason, null, -1, null, session, this);
   }
 
+  /**
+   * Log all SQLFeatureNotSupported exceptions with this function. Has to be called before throwing
+   * exception. These contain no query ID or errorCodes or vendorCodes. We can add a SQLState.
+   *
+   * @param session
+   */
   public static void logSqlFeatureNotSupportedException(SFSession session) {
     sendTelemetryData(
         null,
