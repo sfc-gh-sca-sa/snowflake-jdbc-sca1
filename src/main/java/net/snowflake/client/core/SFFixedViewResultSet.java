@@ -129,6 +129,7 @@ public class SFFixedViewResultSet extends SFJsonResultSet {
 
   @Override
   public void setStatementType(SFStatementType statementType) throws SQLException {
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 

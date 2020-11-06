@@ -31,6 +31,7 @@ class SnowflakeDatabaseMetaDataQueryResultSet extends SnowflakeDatabaseMetaDataR
   @Override
   public boolean isLast() throws SQLException {
     raiseSQLExceptionIfResultSetIsClosed();
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -43,6 +44,7 @@ class SnowflakeDatabaseMetaDataQueryResultSet extends SnowflakeDatabaseMetaDataR
   @Override
   public boolean isAfterLast() throws SQLException {
     raiseSQLExceptionIfResultSetIsClosed();
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 }

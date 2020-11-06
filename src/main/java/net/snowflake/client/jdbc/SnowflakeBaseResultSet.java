@@ -4,11 +4,6 @@
 
 package net.snowflake.client.jdbc;
 
-import net.snowflake.client.core.SFSession;
-import net.snowflake.client.log.SFLogger;
-import net.snowflake.client.log.SFLoggerFactory;
-import net.snowflake.common.core.SqlState;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -19,6 +14,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import net.snowflake.client.core.SFSession;
+import net.snowflake.client.log.SFLogger;
+import net.snowflake.client.log.SFLoggerFactory;
+import net.snowflake.common.core.SqlState;
 
 /** Base class for query result set and metadata result set */
 abstract class SnowflakeBaseResultSet implements ResultSet {
@@ -32,14 +31,18 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   protected SnowflakeResultSetMetaDataV1 resultSetMetaData = null;
   protected Map<String, Object> parameters = new HashMap<>();
   private int fetchSize = 0;
-  private SFSession session = null;
+  protected SFSession session = null;
 
   SnowflakeBaseResultSet(Statement statement) throws SQLException {
     this.statement = statement;
     this.resultSetType = statement.getResultSetType();
     this.resultSetConcurrency = statement.getResultSetConcurrency();
     this.resultSetHoldability = statement.getResultSetHoldability();
-    this.session = statement.unwrap(SnowflakeStatementV1.class).connection.getSfSession();
+    try {
+      this.session = statement.unwrap(SnowflakeStatementV1.class).connection.getSfSession();
+    } catch (SQLException e) {
+      this.session = null;
+    }
   }
 
   /**
@@ -120,14 +123,14 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   @Override
   public InputStream getUnicodeStream(int columnIndex) throws SQLException {
     logger.debug("public InputStream getUnicodeStream(int columnIndex)");
-
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
   @Override
   public InputStream getBinaryStream(int columnIndex) throws SQLException {
     logger.debug("public InputStream getBinaryStream(int columnIndex)");
-
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -228,7 +231,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   @Override
   public InputStream getAsciiStream(String columnLabel) throws SQLException {
     logger.debug("public InputStream getAsciiStream(String columnLabel)");
-
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -238,6 +241,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public InputStream getUnicodeStream(String columnLabel) throws SQLException {
     logger.debug("public InputStream getUnicodeStream(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -245,6 +249,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public InputStream getBinaryStream(String columnLabel) throws SQLException {
     logger.debug("public InputStream getBinaryStream(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -265,6 +270,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public String getCursorName() throws SQLException {
     logger.debug("public String getCursorName()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -320,6 +326,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void beforeFirst() throws SQLException {
     logger.debug("public void beforeFirst()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -327,6 +334,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void afterLast() throws SQLException {
     logger.debug("public void afterLast()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -334,6 +342,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean first() throws SQLException {
     logger.debug("public boolean first()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -341,6 +350,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean last() throws SQLException {
     logger.debug("public boolean last()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -348,6 +358,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean absolute(int row) throws SQLException {
     logger.debug("public boolean absolute(int row)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -355,6 +366,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean relative(int rows) throws SQLException {
     logger.debug("public boolean relative(int rows)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -362,6 +374,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean previous() throws SQLException {
     logger.debug("public boolean previous()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -378,6 +391,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
 
     raiseSQLExceptionIfResultSetIsClosed();
     if (direction != ResultSet.FETCH_FORWARD) {
+      SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
       throw new SQLFeatureNotSupportedException();
     }
   }
@@ -415,6 +429,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean rowUpdated() throws SQLException {
     logger.debug("public boolean rowUpdated()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -422,6 +437,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean rowInserted() throws SQLException {
     logger.debug("public boolean rowInserted()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -429,6 +445,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public boolean rowDeleted() throws SQLException {
     logger.debug("public boolean rowDeleted()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -436,6 +453,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNull(int columnIndex) throws SQLException {
     logger.debug("public void updateNull(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -443,6 +461,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBoolean(int columnIndex, boolean x) throws SQLException {
     logger.debug("public void updateBoolean(int columnIndex, boolean x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -450,6 +469,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateByte(int columnIndex, byte x) throws SQLException {
     logger.debug("public void updateByte(int columnIndex, byte x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -457,6 +477,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateShort(int columnIndex, short x) throws SQLException {
     logger.debug("public void updateShort(int columnIndex, short x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -464,6 +485,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateInt(int columnIndex, int x) throws SQLException {
     logger.debug("public void updateInt(int columnIndex, int x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -471,6 +493,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateLong(int columnIndex, long x) throws SQLException {
     logger.debug("public void updateLong(int columnIndex, long x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -478,6 +501,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateFloat(int columnIndex, float x) throws SQLException {
     logger.debug("public void updateFloat(int columnIndex, float x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -485,6 +509,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateDouble(int columnIndex, double x) throws SQLException {
     logger.debug("public void updateDouble(int columnIndex, double x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -492,6 +517,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBigDecimal(int columnIndex, BigDecimal x) throws SQLException {
     logger.debug("public void updateBigDecimal(int columnIndex, BigDecimal x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -499,6 +525,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateString(int columnIndex, String x) throws SQLException {
     logger.debug("public void updateString(int columnIndex, String x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -506,6 +533,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBytes(int columnIndex, byte[] x) throws SQLException {
     logger.debug("public void updateBytes(int columnIndex, byte[] x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -513,6 +541,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateDate(int columnIndex, Date x) throws SQLException {
     logger.debug("public void updateDate(int columnIndex, Date x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -520,6 +549,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateTime(int columnIndex, Time x) throws SQLException {
     logger.debug("public void updateTime(int columnIndex, Time x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -527,6 +557,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
     logger.debug("public void updateTimestamp(int columnIndex, Timestamp x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -534,6 +565,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateAsciiStream(int columnIndex, InputStream x, int length) throws SQLException {
     logger.debug("public void updateAsciiStream(int columnIndex, " + "InputStream x, int length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -541,6 +573,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
     logger.debug("public void updateBinaryStream(int columnIndex, " + "InputStream x, int length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -548,6 +581,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
     logger.debug("public void updateCharacterStream(int columnIndex, " + "Reader x, int length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -555,6 +589,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateObject(int columnIndex, Object x, int scaleOrLength) throws SQLException {
     logger.debug("public void updateObject(int columnIndex, Object x, " + "int scaleOrLength)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -562,6 +597,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateObject(int columnIndex, Object x) throws SQLException {
     logger.debug("public void updateObject(int columnIndex, Object x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -569,6 +605,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNull(String columnLabel) throws SQLException {
     logger.debug("public void updateNull(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -576,6 +613,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBoolean(String columnLabel, boolean x) throws SQLException {
     logger.debug("public void updateBoolean(String columnLabel, boolean x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -583,6 +621,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateByte(String columnLabel, byte x) throws SQLException {
     logger.debug("public void updateByte(String columnLabel, byte x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -590,6 +629,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateShort(String columnLabel, short x) throws SQLException {
     logger.debug("public void updateShort(String columnLabel, short x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -597,6 +637,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateInt(String columnLabel, int x) throws SQLException {
     logger.debug("public void updateInt(String columnLabel, int x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -604,6 +645,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateLong(String columnLabel, long x) throws SQLException {
     logger.debug("public void updateLong(String columnLabel, long x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -611,6 +653,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateFloat(String columnLabel, float x) throws SQLException {
     logger.debug("public void updateFloat(String columnLabel, float x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -618,6 +661,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateDouble(String columnLabel, double x) throws SQLException {
     logger.debug("public void updateDouble(String columnLabel, double x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -625,6 +669,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBigDecimal(String columnLabel, BigDecimal x) throws SQLException {
     logger.debug("public void updateBigDecimal(String columnLabel, " + "BigDecimal x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -632,6 +677,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateString(String columnLabel, String x) throws SQLException {
     logger.debug("public void updateString(String columnLabel, String x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -639,6 +685,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBytes(String columnLabel, byte[] x) throws SQLException {
     logger.debug("public void updateBytes(String columnLabel, byte[] x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -646,6 +693,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateDate(String columnLabel, Date x) throws SQLException {
     logger.debug("public void updateDate(String columnLabel, Date x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -653,6 +701,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateTime(String columnLabel, Time x) throws SQLException {
     logger.debug("public void updateTime(String columnLabel, Time x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -660,6 +709,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateTimestamp(String columnLabel, Timestamp x) throws SQLException {
     logger.debug("public void updateTimestamp(String columnLabel, Timestamp x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -668,6 +718,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateAsciiStream(String columnLabel, " + "InputStream x, int length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -677,6 +728,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateBinaryStream(String columnLabel, " + "InputStream x, int length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -686,6 +738,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateCharacterStream(String columnLabel, " + "Reader reader,int length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -693,6 +746,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateObject(String columnLabel, Object x, int scaleOrLength) throws SQLException {
     logger.debug("public void updateObject(String columnLabel, Object x, " + "int scaleOrLength)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -700,6 +754,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateObject(String columnLabel, Object x) throws SQLException {
     logger.debug("public void updateObject(String columnLabel, Object x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -707,6 +762,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void insertRow() throws SQLException {
     logger.debug("public void insertRow()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -714,6 +770,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateRow() throws SQLException {
     logger.debug("public void updateRow()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -721,6 +778,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void deleteRow() throws SQLException {
     logger.debug("public void deleteRow()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -728,6 +786,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void refreshRow() throws SQLException {
     logger.debug("public void refreshRow()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -735,6 +794,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void cancelRowUpdates() throws SQLException {
     logger.debug("public void cancelRowUpdates()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -742,6 +802,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void moveToInsertRow() throws SQLException {
     logger.debug("public void moveToInsertRow()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -749,6 +810,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void moveToCurrentRow() throws SQLException {
     logger.debug("public void moveToCurrentRow()");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -763,6 +825,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
     logger.debug("public Object getObject(int columnIndex, Map<String, " + "Class<?>> map)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -770,6 +833,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Ref getRef(int columnIndex) throws SQLException {
     logger.debug("public Ref getRef(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -777,6 +841,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Blob getBlob(int columnIndex) throws SQLException {
     logger.debug("public Blob getBlob(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -790,6 +855,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Array getArray(int columnIndex) throws SQLException {
     logger.debug("public Array getArray(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -797,6 +863,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
     logger.debug("public Object getObject(String columnLabel, " + "Map<String, Class<?>> map)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -804,6 +871,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Ref getRef(String columnLabel) throws SQLException {
     logger.debug("public Ref getRef(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -811,6 +879,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Blob getBlob(String columnLabel) throws SQLException {
     logger.debug("public Blob getBlob(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -825,6 +894,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Array getArray(String columnLabel) throws SQLException {
     logger.debug("public Array getArray(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -873,6 +943,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public URL getURL(int columnIndex) throws SQLException {
     logger.debug("public URL getURL(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -880,6 +951,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public URL getURL(String columnLabel) throws SQLException {
     logger.debug("public URL getURL(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -887,6 +959,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateRef(int columnIndex, Ref x) throws SQLException {
     logger.debug("public void updateRef(int columnIndex, Ref x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -894,6 +967,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateRef(String columnLabel, Ref x) throws SQLException {
     logger.debug("public void updateRef(String columnLabel, Ref x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -901,6 +975,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBlob(int columnIndex, Blob x) throws SQLException {
     logger.debug("public void updateBlob(int columnIndex, Blob x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -908,6 +983,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBlob(String columnLabel, Blob x) throws SQLException {
     logger.debug("public void updateBlob(String columnLabel, Blob x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -915,6 +991,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateClob(int columnIndex, Clob x) throws SQLException {
     logger.debug("public void updateClob(int columnIndex, Clob x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -922,6 +999,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateClob(String columnLabel, Clob x) throws SQLException {
     logger.debug("public void updateClob(String columnLabel, Clob x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -929,6 +1007,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateArray(int columnIndex, Array x) throws SQLException {
     logger.debug("public void updateArray(int columnIndex, Array x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -936,6 +1015,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateArray(String columnLabel, Array x) throws SQLException {
     logger.debug("public void updateArray(String columnLabel, Array x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -943,6 +1023,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public RowId getRowId(int columnIndex) throws SQLException {
     logger.debug("public RowId getRowId(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -950,6 +1031,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public RowId getRowId(String columnLabel) throws SQLException {
     logger.debug("public RowId getRowId(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -957,6 +1039,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateRowId(int columnIndex, RowId x) throws SQLException {
     logger.debug("public void updateRowId(int columnIndex, RowId x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -964,6 +1047,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateRowId(String columnLabel, RowId x) throws SQLException {
     logger.debug("public void updateRowId(String columnLabel, RowId x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -978,6 +1062,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNString(int columnIndex, String nString) throws SQLException {
     logger.debug("public void updateNString(int columnIndex, String nString)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -985,6 +1070,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNString(String columnLabel, String nString) throws SQLException {
     logger.debug("public void updateNString(String columnLabel, String nString)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -992,6 +1078,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
     logger.debug("public void updateNClob(int columnIndex, NClob nClob)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -999,6 +1086,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
     logger.debug("public void updateNClob(String columnLabel, NClob nClob)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1006,6 +1094,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public NClob getNClob(int columnIndex) throws SQLException {
     logger.debug("public NClob getNClob(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1013,6 +1102,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public NClob getNClob(String columnLabel) throws SQLException {
     logger.debug("public NClob getNClob(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1020,6 +1110,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public SQLXML getSQLXML(int columnIndex) throws SQLException {
     logger.debug("public SQLXML getSQLXML(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1027,6 +1118,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public SQLXML getSQLXML(String columnLabel) throws SQLException {
     logger.debug("public SQLXML getSQLXML(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1034,6 +1126,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
     logger.debug("public void updateSQLXML(int columnIndex, SQLXML xmlObject)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1041,6 +1134,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
     logger.debug("public void updateSQLXML(String columnLabel, SQLXML xmlObject)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1048,6 +1142,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public String getNString(int columnIndex) throws SQLException {
     logger.debug("public String getNString(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1055,6 +1150,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public String getNString(String columnLabel) throws SQLException {
     logger.debug("public String getNString(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1062,6 +1158,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Reader getNCharacterStream(int columnIndex) throws SQLException {
     logger.debug("public Reader getNCharacterStream(int columnIndex)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1069,6 +1166,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public Reader getNCharacterStream(String columnLabel) throws SQLException {
     logger.debug("public Reader getNCharacterStream(String columnLabel)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1076,6 +1174,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
     logger.debug("public void updateNCharacterStream(int columnIndex, " + "Reader x, long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1085,6 +1184,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateNCharacterStream(String columnLabel, " + "Reader reader,long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1092,6 +1192,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
     logger.debug("public void updateAsciiStream(int columnIndex, " + "InputStream x, long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1100,6 +1201,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateBinaryStream(int columnIndex, " + "InputStream x, long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1107,6 +1209,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
     logger.debug("public void updateCharacterStream(int columnIndex, Reader x, " + "long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1116,6 +1219,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateAsciiStream(String columnLabel, " + "InputStream x, long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1125,6 +1229,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateBinaryStream(String columnLabel, " + "InputStream x, long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1134,6 +1239,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateCharacterStream(String columnLabel, " + "Reader reader,long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1143,6 +1249,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateBlob(int columnIndex, InputStream " + "inputStream, long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1152,6 +1259,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     logger.debug(
         "public void updateBlob(String columnLabel, " + "InputStream inputStream,long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1159,6 +1267,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateClob(int columnIndex, Reader reader, long length) throws SQLException {
     logger.debug("public void updateClob(int columnIndex, Reader reader, " + "long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1166,6 +1275,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateClob(String columnLabel, Reader reader, long length) throws SQLException {
     logger.debug("public void updateClob(String columnLabel, Reader reader, " + "long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1173,6 +1283,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException {
     logger.debug("public void updateNClob(int columnIndex, Reader reader, " + "long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1180,6 +1291,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException {
     logger.debug("public void updateNClob(String columnLabel, Reader reader, " + "long length)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1187,6 +1299,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
     logger.debug("public void updateNCharacterStream(int columnIndex, Reader x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1194,6 +1307,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
     logger.debug("public void updateNCharacterStream(String columnLabel, " + "Reader reader)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1201,6 +1315,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException {
     logger.debug("public void updateAsciiStream(int columnIndex, InputStream x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1208,6 +1323,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
     logger.debug("public void updateBinaryStream(int columnIndex, InputStream x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1215,6 +1331,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
     logger.debug("public void updateCharacterStream(int columnIndex, Reader x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1222,6 +1339,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException {
     logger.debug("public void updateAsciiStream(String columnLabel, InputStream x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1229,6 +1347,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
     logger.debug("public void updateBinaryStream(String columnLabel, InputStream x)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1236,6 +1355,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
     logger.debug("public void updateCharacterStream(String columnLabel, " + "Reader reader)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1243,6 +1363,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException {
     logger.debug("public void updateBlob(int columnIndex, InputStream inputStream)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1250,6 +1371,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException {
     logger.debug("public void updateBlob(String columnLabel, InputStream " + "inputStream)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1257,6 +1379,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateClob(int columnIndex, Reader reader) throws SQLException {
     logger.debug("public void updateClob(int columnIndex, Reader reader)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1264,6 +1387,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateClob(String columnLabel, Reader reader) throws SQLException {
     logger.debug("public void updateClob(String columnLabel, Reader reader)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1271,6 +1395,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNClob(int columnIndex, Reader reader) throws SQLException {
     logger.debug("public void updateNClob(int columnIndex, Reader reader)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1278,6 +1403,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public void updateNClob(String columnLabel, Reader reader) throws SQLException {
     logger.debug("public void updateNClob(String columnLabel, Reader reader)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1285,6 +1411,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
     logger.debug("public <T> T getObject(int columnIndex,Class<T> type)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
@@ -1292,6 +1419,7 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
   public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
     logger.debug("public <T> T getObject(String columnLabel,Class<T> type)");
 
+    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
     throw new SQLFeatureNotSupportedException();
   }
 
