@@ -1,14 +1,5 @@
 package net.snowflake.client.jdbc.telemetryOOB;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
-import java.util.concurrent.TimeUnit;
 import net.snowflake.client.category.TestCategoryCore;
 import net.snowflake.client.core.SFSession;
 import net.snowflake.client.jdbc.BaseJDBCTest;
@@ -22,6 +13,16 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 /** Standalone test cases for the out of band telemetry service */
 @Category(TestCategoryCore.class)
@@ -224,7 +225,6 @@ public class TelemetryServiceIT extends BaseJDBCTest {
   public void testSnowflakeSQLLoggedExceptionOOBTelemetry()
       throws SQLException, InterruptedException {
     // make a connection to initialize telemetry instance
-    Connection con = getConnection();
     int fakeVendorCode = 27;
     try {
       generateDummyException(fakeVendorCode, null);
@@ -256,7 +256,7 @@ public class TelemetryServiceIT extends BaseJDBCTest {
    * @throws SQLException
    */
   @Test
-  public void testSQLFeatureNotSupportedOOBTelemetry() throws SQLException, InterruptedException {
+  public void testSQLFeatureNotSupportedOOBTelemetry() throws InterruptedException {
     // with null session, OOB telemetry will be thrown
     try {
       generateSQLFeatureNotSupportedException();
@@ -284,14 +284,16 @@ public class TelemetryServiceIT extends BaseJDBCTest {
   @Test
   public void testSnowflakeSQLLoggedExceptionIBTelemetry() throws SQLException {
     // make a connection to initialize telemetry instance
-    Connection con = getConnection();
-    int fakeErrorCode = 27;
-    try {
-      generateDummyException(fakeErrorCode, con.unwrap(SnowflakeConnectionV1.class).getSfSession());
-      fail();
-    } catch (SnowflakeSQLLoggedException e) {
-      // The error response has the same code as the fakeErrorCode
-      assertThat("Communication error", e.getErrorCode(), equalTo(fakeErrorCode));
+    try (Connection con = getConnection()) {
+      int fakeErrorCode = 27;
+      try {
+        generateDummyException(
+            fakeErrorCode, con.unwrap(SnowflakeConnectionV1.class).getSfSession());
+        fail();
+      } catch (SnowflakeSQLLoggedException e) {
+        // The error response has the same code as the fakeErrorCode
+        assertThat("Communication error", e.getErrorCode(), equalTo(fakeErrorCode));
+      }
     }
   }
 
@@ -307,18 +309,13 @@ public class TelemetryServiceIT extends BaseJDBCTest {
    * @throws SQLException
    */
   @Ignore
-  @Test
+  @Test(expected = SQLFeatureNotSupportedException.class)
   public void testSqlFeatureNotSupportedExceptionIBTelemetry() throws SQLException {
     // make a connection to initialize telemetry instance
-    Connection con = getConnection();
-    Statement statement = con.createStatement();
-    try {
+    try (Connection con = getConnection()) {
+      Statement statement = con.createStatement();
       // try to execute a statement that throws a SQLFeatureNotSupportedException
       statement.execute("select 1", new int[] {});
-      fail();
-    } catch (SQLFeatureNotSupportedException e) {
-      // Expect SQLFeatureNotSupported message with telemetry exception thrown. Has no codes or
-      // sqlstate
     }
   }
 }

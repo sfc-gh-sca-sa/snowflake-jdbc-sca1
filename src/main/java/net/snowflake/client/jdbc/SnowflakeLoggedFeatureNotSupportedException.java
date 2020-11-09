@@ -1,10 +1,15 @@
+/*
+ * Copyright (c) 2012-2020 Snowflake Computing Inc. All rights reserved.
+ */
+
 package net.snowflake.client.jdbc;
 
-import static net.snowflake.client.jdbc.SnowflakeSQLLoggedException.sendTelemetryData;
-
-import java.sql.SQLFeatureNotSupportedException;
 import net.snowflake.client.core.SFSession;
 import net.snowflake.common.core.SqlState;
+
+import java.sql.SQLFeatureNotSupportedException;
+
+import static net.snowflake.client.jdbc.SnowflakeSQLLoggedException.sendTelemetryData;
 
 public class SnowflakeLoggedFeatureNotSupportedException extends SQLFeatureNotSupportedException {
 
