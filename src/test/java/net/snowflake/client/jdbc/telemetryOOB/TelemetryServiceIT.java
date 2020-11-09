@@ -13,6 +13,7 @@ import net.snowflake.client.category.TestCategoryCore;
 import net.snowflake.client.core.SFSession;
 import net.snowflake.client.jdbc.BaseJDBCTest;
 import net.snowflake.client.jdbc.SnowflakeConnectionV1;
+import net.snowflake.client.jdbc.SnowflakeLoggedFeatureNotSupportedException;
 import net.snowflake.client.jdbc.SnowflakeSQLLoggedException;
 import net.snowflake.common.core.SqlState;
 import org.apache.commons.lang3.time.StopWatch;
@@ -209,6 +210,10 @@ public class TelemetryServiceIT extends BaseJDBCTest {
     throw new SnowflakeSQLLoggedException(session, reason, sqlState, vendorCode, queryID);
   }
 
+  private int generateSQLFeatureNotSupportedException() throws SQLFeatureNotSupportedException {
+    throw new SnowflakeLoggedFeatureNotSupportedException(null);
+  }
+
   /**
    * Test case for checking telemetry message for SnowflakeSQLExceptions. Assert that telemetry OOB
    * endpoint is reached after a SnowflakeSQLLoggedException is thrown.
@@ -253,17 +258,20 @@ public class TelemetryServiceIT extends BaseJDBCTest {
   @Test
   public void testSQLFeatureNotSupportedOOBTelemetry() throws SQLException, InterruptedException {
     // with null session, OOB telemetry will be thrown
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(null);
-
-    // since it returns normal response,
-    // the telemetry does not create new event
-    Thread.sleep(WAIT_FOR_TELEMETRY_REPORT_IN_MILLISECS);
-    if (TelemetryService.getInstance().isDeploymentEnabled()) {
-      assertThat(
-          "Telemetry event has not been reported successfully. Error: "
-              + TelemetryService.getInstance().getLastClientError(),
-          TelemetryService.getInstance().getClientFailureCount(),
-          equalTo(0));
+    try {
+      generateSQLFeatureNotSupportedException();
+      fail("SqlFeatureNotSupportedException failed to throw.");
+    } catch (SQLFeatureNotSupportedException e) {
+      // since it returns normal response,
+      // the telemetry does not create new event
+      Thread.sleep(WAIT_FOR_TELEMETRY_REPORT_IN_MILLISECS);
+      if (TelemetryService.getInstance().isDeploymentEnabled()) {
+        assertThat(
+            "Telemetry event has not been reported successfully. Error: "
+                + TelemetryService.getInstance().getLastClientError(),
+            TelemetryService.getInstance().getClientFailureCount(),
+            equalTo(0));
+      }
     }
   }
 
@@ -305,6 +313,7 @@ public class TelemetryServiceIT extends BaseJDBCTest {
     Connection con = getConnection();
     Statement statement = con.createStatement();
     try {
+      // try to execute a statement that throws a SQLFeatureNotSupportedException
       statement.execute("select 1", new int[] {});
       fail();
     } catch (SQLFeatureNotSupportedException e) {

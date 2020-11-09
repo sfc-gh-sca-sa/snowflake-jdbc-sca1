@@ -1867,8 +1867,7 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
     logger.debug(
         "public ResultSet getBestRowIdentifier(String catalog, "
             + "String schema,String table, int scope,boolean nullable)");
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -1877,8 +1876,7 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
     logger.debug(
         "public ResultSet getVersionColumns(String catalog, " + "String schema, String table)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -2651,8 +2649,7 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
         "public ResultSet getSuperTypes(String catalog, "
             + "String schemaPattern,String typeNamePattern)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -2662,8 +2659,7 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
         "public ResultSet getSuperTables(String catalog, "
             + "String schemaPattern,String tableNamePattern)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -2675,8 +2671,7 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
             + "schemaPattern,"
             + "String typeNamePattern,String attributeNamePattern)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -2724,16 +2719,14 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
   public int getSQLStateType() throws SQLException {
     logger.debug("public int getSQLStateType()");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
   public boolean locatorsUpdateCopy() throws SQLException {
     logger.debug("public boolean locatorsUpdateCopy()");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -2747,8 +2740,7 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
   public RowIdLifetime getRowIdLifetime() throws SQLException {
     logger.debug("public RowIdLifetime getRowIdLifetime()");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -2826,16 +2818,14 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
   public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
     logger.debug("public boolean autoCommitFailureClosesAllResultSets()");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
   public ResultSet getClientInfoProperties() throws SQLException {
     logger.debug("public ResultSet getClientInfoProperties()");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -3067,32 +3057,28 @@ public class SnowflakeDatabaseMetaData implements DatabaseMetaData {
             + "String schemaPattern,String tableNamePattern,"
             + "String columnNamePattern)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   // @Override
   public boolean generatedKeyAlwaysReturned() throws SQLException {
     logger.debug("public boolean generatedKeyAlwaysReturned()");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException {
     logger.debug("public <T> T unwrap(Class<T> iface)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
   public boolean isWrapperFor(Class<?> iface) throws SQLException {
     logger.debug("public boolean isWrapperFor(Class<?> iface)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   /**

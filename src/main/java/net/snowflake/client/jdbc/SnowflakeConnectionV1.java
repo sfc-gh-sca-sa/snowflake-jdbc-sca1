@@ -409,8 +409,8 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
   @Override
   public void rollback(Savepoint savepoint) throws SQLException {
     logger.debug("void rollback(Savepoint savepoint)");
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
@@ -418,8 +418,8 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
     logger.debug("void setReadOnly(boolean readOnly)");
     raiseSQLExceptionIfConnectionIsClosed();
     if (readOnly) {
-      SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-      throw new SQLFeatureNotSupportedException();
+
+      throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
     }
   }
 
@@ -527,24 +527,21 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
       return prepareStatement(sql);
     }
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
     logger.debug("PreparedStatement prepareStatement(String sql, " + "int[] columnIndexes)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
     logger.debug("PreparedStatement prepareStatement(String sql, " + "String[] columnNames)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
@@ -595,14 +592,14 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
 
   @Override
   public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public void setHoldability(int holdability) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
@@ -613,26 +610,26 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
 
   @Override
   public Savepoint setSavepoint() throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public Savepoint setSavepoint(String name) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public Blob createBlob() throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
@@ -643,14 +640,14 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
 
   @Override
   public NClob createNClob() throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public SQLXML createSQLXML() throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
@@ -718,16 +715,14 @@ public class SnowflakeConnectionV1 implements Connection, SnowflakeConnection {
   public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
     logger.debug("Array createArrayOf(String typeName, Object[] " + "elements)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override
   public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
     logger.debug("Struct createStruct(String typeName, Object[] " + "attributes)");
 
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(sfSession);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(sfSession);
   }
 
   @Override

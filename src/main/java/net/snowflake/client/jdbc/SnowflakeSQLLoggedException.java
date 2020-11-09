@@ -10,7 +10,6 @@ import com.google.api.client.util.Strings;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -25,7 +24,6 @@ import net.snowflake.client.jdbc.telemetry.TelemetryUtil;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryEvent;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryService;
 import net.snowflake.common.core.LoginInfoDTO;
-import net.snowflake.common.core.SqlState;
 
 /**
  * @author mknister
@@ -278,22 +276,5 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
   public SnowflakeSQLLoggedException(SFSession session, String reason) {
     super(reason);
     sendTelemetryData(null, reason, null, -1, null, session, this);
-  }
-
-  /**
-   * Log all SQLFeatureNotSupported exceptions with this function. Has to be called before throwing
-   * exception. These contain no query ID or errorCodes or vendorCodes. We can add a SQLState.
-   *
-   * @param session
-   */
-  public static void logSqlFeatureNotSupportedException(SFSession session) {
-    sendTelemetryData(
-        null,
-        "API call to unsupported JDBC function",
-        SqlState.FEATURE_NOT_SUPPORTED,
-        -1,
-        null,
-        session,
-        new SQLFeatureNotSupportedException());
   }
 }

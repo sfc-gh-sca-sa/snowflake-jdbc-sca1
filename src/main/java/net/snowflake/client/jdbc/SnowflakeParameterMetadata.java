@@ -4,7 +4,6 @@ import static net.snowflake.client.jdbc.SnowflakeType.convertStringToType;
 
 import java.sql.ParameterMetaData;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import net.snowflake.client.core.MetaDataOfBinds;
 import net.snowflake.client.core.SFSession;
 import net.snowflake.client.core.SFStatementMetaData;
@@ -40,8 +39,7 @@ class SnowflakeParameterMetadata implements ParameterMetaData {
 
   @Override
   public boolean isSigned(int param) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
@@ -70,14 +68,12 @@ class SnowflakeParameterMetadata implements ParameterMetaData {
 
   @Override
   public String getParameterClassName(int param) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @Override
   public int getParameterMode(int param) throws SQLException {
-    SnowflakeSQLLoggedException.logSqlFeatureNotSupportedException(session);
-    throw new SQLFeatureNotSupportedException();
+    throw new SnowflakeLoggedFeatureNotSupportedException(session);
   }
 
   @SuppressWarnings("unchecked")
