@@ -4,18 +4,8 @@
 
 package net.snowflake.client.jdbc;
 
-import static net.snowflake.client.core.Constants.GB;
-import static net.snowflake.client.core.Constants.MB;
-import static net.snowflake.client.core.SessionUtil.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 import net.snowflake.client.core.*;
 import net.snowflake.client.jdbc.telemetry.NoOpTelemetryClient;
 import net.snowflake.client.jdbc.telemetry.Telemetry;
@@ -27,6 +17,17 @@ import net.snowflake.common.core.SnowflakeDateTimeFormat;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.ipc.ArrowStreamReader;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+
+import static net.snowflake.client.core.Constants.GB;
+import static net.snowflake.client.core.Constants.MB;
+import static net.snowflake.client.core.SessionUtil.*;
 
 /**
  * This object is an intermediate object between result JSON from GS and ResultSet. Originally, it
@@ -138,7 +139,7 @@ public class SnowflakeResultSetSerializableV1
   QueryResultFormat queryResultFormat;
   boolean treatNTZAsUTC;
   boolean formatDateWithTimezone;
-  boolean useWallclockTime;
+  boolean useSessionTimezone;
 
   // Below fields are transient, they are generated from parameters
   transient TimeZone timeZone;
@@ -190,7 +191,7 @@ public class SnowflakeResultSetSerializableV1
     this.resultSetHoldability = toCopy.resultSetHoldability;
     this.treatNTZAsUTC = toCopy.treatNTZAsUTC;
     this.formatDateWithTimezone = toCopy.formatDateWithTimezone;
-    this.useWallclockTime = toCopy.useWallclockTime;
+    this.useSessionTimezone = toCopy.useSessionTimezone;
 
     // Below are some metadata fields parsed from the result JSON node
     this.queryId = toCopy.queryId;
@@ -427,8 +428,8 @@ public class SnowflakeResultSetSerializableV1
     return formatDateWithTimezone;
   }
 
-  public boolean useWallclockTime() {
-    return useWallclockTime;
+  public boolean getUseSessionTimezone() {
+    return useSessionTimezone;
   }
 
   public Optional<SFSession> getSession() {
@@ -578,7 +579,7 @@ public class SnowflakeResultSetSerializableV1
     resultSetSerializable.isResultColumnCaseInsensitive = sfSession.isResultColumnCaseInsensitive();
     resultSetSerializable.treatNTZAsUTC = sfSession.getTreatNTZAsUTC();
     resultSetSerializable.formatDateWithTimezone = sfSession.getFormatDateWithTimezone();
-    resultSetSerializable.useWallclockTime = sfSession.getUseWallclockTime();
+    resultSetSerializable.useSessionTimezone = sfSession.getUseSessionTimezone();
 
     // setup transient fields from parameter
     resultSetSerializable.setupFieldsFromParameters();

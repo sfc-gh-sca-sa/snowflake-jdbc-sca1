@@ -413,14 +413,14 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       return new SnowflakeTimeAsWallclock(
           sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS),
           sfTime.getNanosecondsWithinSecond(),
-          resultSetSerializable.useWallclockTime());
+          resultSetSerializable.getUseSessionTimezone());
     } else if (Types.TIMESTAMP == columnType) {
       Timestamp ts = getTimestamp(columnIndex);
       if (ts == null) {
         return null;
       }
       return new SnowflakeTimeAsWallclock(
-          ts.getTime(), ts.getNanos(), resultSetSerializable.useWallclockTime());
+          ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone());
     } else {
       throw new SFException(
           ErrorCode.INVALID_VALUE_CONVERT,
