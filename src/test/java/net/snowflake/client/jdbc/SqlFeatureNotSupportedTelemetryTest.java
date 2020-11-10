@@ -1,10 +1,10 @@
 package net.snowflake.client.jdbc;
 
-import static org.junit.Assert.assertEquals;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.minidev.json.JSONObject;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class SqlFeatureNotSupportedTelemetryTest {
 
@@ -23,8 +23,6 @@ public class SqlFeatureNotSupportedTelemetryTest {
           + queryId
           + "\",\"SQLState\":\""
           + SQLState
-          + "\",\"reason\":\""
-          + reason
           + "\",\"ErrorNumber\":"
           + vendorCode
           + "}";
@@ -33,7 +31,7 @@ public class SqlFeatureNotSupportedTelemetryTest {
   @Test
   public void testCreateIBValue() {
     ObjectNode ibValue =
-        SnowflakeSQLLoggedException.createIBValue(queryId, reason, SQLState, vendorCode, errorCode);
+        SnowflakeSQLLoggedException.createIBValue(reason, SQLState, vendorCode);
     assertEquals(comparison, ibValue.toString());
   }
 
@@ -42,14 +40,12 @@ public class SqlFeatureNotSupportedTelemetryTest {
   public void testCreateOOBValue() {
     JSONObject oobValue =
         SnowflakeSQLLoggedException.createOOBValue(
-            queryId, reason, SQLState, vendorCode, errorCode);
+            queryId, SQLState, vendorCode);
     assertEquals("client_sql_exception", oobValue.get("type").toString());
     assertEquals("JDBC", oobValue.get("DriverType").toString());
     assertEquals(driverVersion, oobValue.get("DriverVersion").toString());
     assertEquals(queryId, oobValue.get("QueryID").toString());
-    assertEquals(reason, oobValue.get("reason").toString());
     assertEquals(SQLState, oobValue.get("SQLState").toString());
     assertEquals(vendorCode, oobValue.get("ErrorNumber"));
-    assertEquals(null, oobValue.get("ErrorType"));
   }
 }

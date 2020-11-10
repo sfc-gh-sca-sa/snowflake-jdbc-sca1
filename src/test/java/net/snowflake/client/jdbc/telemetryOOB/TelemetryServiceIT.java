@@ -308,7 +308,7 @@ public class TelemetryServiceIT extends BaseJDBCTest {
    *
    * @throws SQLException
    */
-  @Ignore
+  //@Ignore
   @Test(expected = SQLFeatureNotSupportedException.class)
   public void testSqlFeatureNotSupportedExceptionIBTelemetry() throws SQLException {
     // make a connection to initialize telemetry instance
