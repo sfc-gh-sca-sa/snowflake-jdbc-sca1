@@ -7,6 +7,15 @@ package net.snowflake.client.jdbc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.util.Strings;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.minidev.json.JSONObject;
 import net.snowflake.client.core.ObjectMapperFactory;
 import net.snowflake.client.core.SFException;
@@ -17,14 +26,6 @@ import net.snowflake.client.jdbc.telemetry.TelemetryUtil;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryEvent;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryService;
 import net.snowflake.common.core.LoginInfoDTO;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.SQLException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author mknister
@@ -52,7 +53,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     ex.printStackTrace(pw);
-    String stackTrace = sw.toString();
+    String stackTrace = maskStacktrace(sw.toString());
     value.put("Stacktrace", stackTrace);
     value.put("Exception", ex.getClass().getSimpleName());
     TelemetryEvent log =
@@ -74,11 +75,30 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     ex.printStackTrace(pw);
-    String stackTrace = sw.toString();
+    String stackTrace = maskStacktrace(sw.toString());
     value.put("Stacktrace", stackTrace);
     value.put("Exception", ex.getClass().getSimpleName());
     ibInstance.addLogToBatch(TelemetryUtil.buildJobData(value));
     return ibInstance.sendBatchAsync();
+  }
+
+  /**
+   * Helper function to remove sensitive data (error message, reason) from the stacktrace.
+   *
+   * @param stackTrace original stacktrace
+   * @return
+   */
+  static String maskStacktrace(String stackTrace) {
+    Pattern STACKTRACE_BEGINNING =
+        Pattern.compile(
+            "(com|net)(\\.snowflake\\.client\\.jdbc\\.Snowflake)(SQLLogged|LoggedFeatureNotSupported)(Exception):(.*)(\\n)",
+            Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    Matcher matcher = STACKTRACE_BEGINNING.matcher(stackTrace);
+    // Remove the reason from after the stack trace (in group #5 of regex pattern)
+    if (matcher.find()) {
+      return matcher.replaceAll("$1$2$3$4$6");
+    }
+    return stackTrace;
   }
 
   /**
@@ -89,8 +109,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param vendorCode
    * @return JSONObject with data about SQLException
    */
-  static JSONObject createOOBValue(
-      String queryId, String SQLState, int vendorCode) {
+  static JSONObject createOOBValue(String queryId, String SQLState, int vendorCode) {
     JSONObject oobValue = new JSONObject();
     oobValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
     oobValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
@@ -115,8 +134,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param vendorCode
    * @return
    */
-  static ObjectNode createIBValue(
-      String queryId, String SQLState, int vendorCode) {
+  static ObjectNode createIBValue(String queryId, String SQLState, int vendorCode) {
     ObjectNode ibValue = mapper.createObjectNode();
     ibValue.put("type", TelemetryField.SQL_EXCEPTION.toString());
     ibValue.put("DriverType", LoginInfoDTO.SF_JDBC_APP_ID);
@@ -145,11 +163,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
    * @param ex Exception object
    */
   public static void sendTelemetryData(
-      String queryId,
-      String SQLState,
-      int vendorCode,
-      SFSession session,
-      SQLException ex) {
+      String queryId, String SQLState, int vendorCode, SFSession session, SQLException ex) {
     Telemetry ibInstance = null;
     // if session is not null, try sending data using in-band telemetry
     if (session != null) {
@@ -176,8 +190,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
             if (!inBandSuccess) {
               logger.debug(
                   "In-band telemetry message failed to send. Sending out-of-band message instead");
-              JSONObject oobValue =
-                  createOOBValue(queryId, SQLState, vendorCode);
+              JSONObject oobValue = createOOBValue(queryId, SQLState, vendorCode);
               sendOutOfBandTelemetryMessage(oobValue, ex, TelemetryService.getInstance());
             }
           });
@@ -217,12 +230,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
       SFSession session, ErrorCode errorCode, Throwable ex, Object... params) {
     super(ex, errorCode, params);
     // add telemetry
-    sendTelemetryData(
-        null,
-        errorCode.getSqlState(),
-        errorCode.getMessageCode(),
-        session,
-        this);
+    sendTelemetryData(null, errorCode.getSqlState(), errorCode.getMessageCode(), session, this);
   }
 
   public SnowflakeSQLLoggedException(
@@ -240,7 +248,7 @@ public class SnowflakeSQLLoggedException extends SnowflakeSQLException {
     String reason =
         errorResourceBundleManager.getLocalizedMessage(
             String.valueOf(errorCode.getMessageCode()), params);
-    sendTelemetryData(null,  null, -1, session, this);
+    sendTelemetryData(null, null, -1, session, this);
   }
 
   public SnowflakeSQLLoggedException(SFSession session, SFException e) {

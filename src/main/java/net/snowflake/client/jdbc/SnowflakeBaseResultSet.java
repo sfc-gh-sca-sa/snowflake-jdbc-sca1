@@ -41,6 +41,9 @@ abstract class SnowflakeBaseResultSet implements ResultSet {
     try {
       this.session = statement.unwrap(SnowflakeStatementV1.class).connection.getSfSession();
     } catch (SQLException e) {
+      // This exception shouldn't be hit. Statement class should be able to be unwrapped.
+      logger.error(
+          "Unable to unwrap SnowflakeStatementV1 class to retrieve session. Session is null.");
       this.session = null;
     }
   }

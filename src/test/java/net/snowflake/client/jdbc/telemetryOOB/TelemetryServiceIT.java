@@ -1,5 +1,14 @@
 package net.snowflake.client.jdbc.telemetryOOB;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
 import net.snowflake.client.category.TestCategoryCore;
 import net.snowflake.client.core.SFSession;
 import net.snowflake.client.jdbc.BaseJDBCTest;
@@ -13,16 +22,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Standalone test cases for the out of band telemetry service */
 @Category(TestCategoryCore.class)
@@ -308,7 +307,7 @@ public class TelemetryServiceIT extends BaseJDBCTest {
    *
    * @throws SQLException
    */
-  //@Ignore
+  // @Ignore
   @Test(expected = SQLFeatureNotSupportedException.class)
   public void testSqlFeatureNotSupportedExceptionIBTelemetry() throws SQLException {
     // make a connection to initialize telemetry instance
