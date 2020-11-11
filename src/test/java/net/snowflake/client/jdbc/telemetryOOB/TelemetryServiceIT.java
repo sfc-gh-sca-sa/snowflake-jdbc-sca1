@@ -298,16 +298,12 @@ public class TelemetryServiceIT extends BaseJDBCTest {
 
   /**
    * Test case for checking telemetry message for SnowflakeFeatureNotSupporteExceptions. In-band
-   * telemetry should be used. After running test, check for telemetry message in client_telemetry_v
-   * table.
+   * telemetry should be used.
    *
-   * <p>Test is ignored because since responses are immediately sent asynchronously (before
-   * execution stops due to sqlexception being thrown) instead of being stored for awhile, it's
-   * difficult to pull out the telemetry logs and look at them before they're sent.
+   * <p>After running test, check for telemetry message in client_telemetry_v table.
    *
    * @throws SQLException
    */
-  // @Ignore
   @Test(expected = SQLFeatureNotSupportedException.class)
   public void testSqlFeatureNotSupportedExceptionIBTelemetry() throws SQLException {
     // make a connection to initialize telemetry instance
