@@ -3,14 +3,6 @@
  */
 package net.snowflake.client.jdbc;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-
-import java.sql.*;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.*;
 import net.snowflake.client.ConditionalIgnoreRule;
 import net.snowflake.client.RunningOnGithubAction;
 import net.snowflake.client.category.TestCategoryResultSet;
@@ -20,6 +12,15 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
+import java.sql.Date;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 /** Test ResultSet */
 @RunWith(Parameterized.class)
@@ -137,8 +138,6 @@ public class ResultSetMultiTimeZoneIT extends BaseJDBCTest {
 
     prepStatement.execute();
 
-    TimeZone gmt = TimeZone.getTimeZone("GMT");
-    Calendar cal = Calendar.getInstance(gmt);
     ResultSet resultSet = statement.executeQuery("select * from datetime");
     resultSet.next();
     assertEquals(date, resultSet.getDate(1));
@@ -161,6 +160,9 @@ public class ResultSetMultiTimeZoneIT extends BaseJDBCTest {
     prepStatement.execute();
     resultSet = statement.executeQuery("select * from datetime");
     resultSet.next();
+    System.out.println(resultSet.getTimestamp("COLA"));
+    System.out.println(resultSet.getTimestamp("COLB"));
+    System.out.println(resultSet.getTimestamp("COLC"));
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     formatter.setTimeZone(TimeZone.getDefault());
     String d = formatter.format(resultSet.getDate("COLA"));

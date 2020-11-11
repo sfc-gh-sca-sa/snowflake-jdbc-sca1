@@ -3,9 +3,11 @@
  */
 package net.snowflake.client.jdbc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import net.snowflake.client.ConditionalIgnoreRule;
+import net.snowflake.client.RunningOnGithubAction;
+import net.snowflake.client.category.TestCategoryResultSet;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,11 +16,11 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Properties;
-import net.snowflake.client.ConditionalIgnoreRule;
-import net.snowflake.client.RunningOnGithubAction;
-import net.snowflake.client.category.TestCategoryResultSet;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import java.util.TimeZone;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 /** Test ResultSet */
 @Category(TestCategoryResultSet.class)
@@ -37,6 +39,22 @@ public class ResultSetIT extends ResultSet0IT {
 
   ResultSetIT(String queryResultFormat) {
     super(queryResultFormat);
+  }
+
+  @Test
+  public void testTimeOffsets() throws SQLException
+  {
+    Connection connection = init();
+    Statement statement = connection.createStatement();
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    statement.execute("alter session set timezone = 'America/Los_Angeles'");
+    statement.execute("create or replace table datetime(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz)");
+    statement.execute("insert into datetime values ('2019-01-01 17:17:17', '2019-01-01 17:17:17', '2019-01-01 17:17:17')");
+    ResultSet rs = statement.executeQuery("select * from datetime");
+    rs.next();
+    System.out.println(rs.getTimestamp("COLA"));
+    System.out.println(rs.getTimestamp("COLB"));
+    System.out.println(rs.getTimestamp("COLC"));
   }
 
   @Test
