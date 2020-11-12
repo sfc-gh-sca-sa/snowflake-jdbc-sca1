@@ -55,6 +55,21 @@ public class SqlFeatureNotSupportedTelemetryTest {
         "net.snowflake.client.jdbc.SnowflakeSQLLoggedException\n"
             + "\tat net.snowflake.client.jdbc.telemetryOOB.TelemetryServiceIT.generateDummyException(TelemetryServiceIT.java:211)\n";
 
+    // Sometimes reason can be multiple lines
+    String multipleLineReasonMessage =
+        "net.snowflake.client.jdbc.SnowflakeSQLException: Error parsing JSON: {\"dsadas\n"
+            + "adsa\":12311}\n"
+            + "  File 'VvCSoHWHrB/0.CSV.gz', line 1, character 0\n"
+            + "  Row 1, column \"SPARK_TEST_TABLE_8417843441957284451\"[\"VAR\":1]\n"
+            + "  If you would like to continue loading when an error is encountered, use other values such as "
+            + "'SKIP_FILE' or 'CONTINUE' for the ON_ERROR option. For more information on loading options, please "
+            + "run 'info loading_data' in a SQL client.\n"
+            + "\tat net.snowflake.client.jdbc.SnowflakeUtil.checkErrorAndThrowExceptionSub(SnowflakeUtil.java:124)\n";
+
+    String maskedMultipleLineReasonMessage =
+        "net.snowflake.client.jdbc.SnowflakeSQLException\n"
+            + "\tat net.snowflake.client.jdbc.SnowflakeUtil.checkErrorAndThrowExceptionSub(SnowflakeUtil.java:124)\n";
+
     assertEquals(
         maskedSnowflakeSQLStacktrace,
         SnowflakeSQLLoggedException.maskStacktrace(snowflakeSQLStacktrace));
@@ -72,5 +87,9 @@ public class SqlFeatureNotSupportedTelemetryTest {
     assertEquals(
         maskedFeatureNotSupportedStacktrace,
         SnowflakeSQLLoggedException.maskStacktrace(featureNotSupportedStacktrace));
+
+    assertEquals(
+        maskedMultipleLineReasonMessage,
+        SnowflakeSQLLoggedException.maskStacktrace(multipleLineReasonMessage));
   }
 }
