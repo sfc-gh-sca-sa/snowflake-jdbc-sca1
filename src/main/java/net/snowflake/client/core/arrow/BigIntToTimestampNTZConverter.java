@@ -102,7 +102,7 @@ public class BigIntToTimestampNTZConverter extends AbstractArrowVectorConverter 
     Timestamp ts = toTimestamp(index, TimeZone.getDefault());
     return ts == null
         ? null
-        : new SnowflakeTimeAsWallclock(ts.getTime(), ts.getNanos(), useWallClockTime);
+        : new SnowflakeTimeAsWallclock(ts.getTime(), ts.getNanos(), useSessionTimezone);
   }
 
   @Override

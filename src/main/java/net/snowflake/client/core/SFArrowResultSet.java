@@ -457,7 +457,8 @@ public class SFArrowResultSet extends SFBaseResultSet implements DataConversionC
     ArrowVectorConverter converter = currentChunkIterator.getCurrentConverter(columnIndex - 1);
     int index = currentChunkIterator.getCurrentRowInRecordBatch();
     wasNull = converter.isNull(index);
-    converter.setUseWallClockTime(useSessionTimezone);
+    converter.setSessionTimeZone(timeZone);
+    converter.setUseSessionTimezone(useSessionTimezone);
     return converter.toTime(index);
   }
 
@@ -465,6 +466,8 @@ public class SFArrowResultSet extends SFBaseResultSet implements DataConversionC
   public Timestamp getTimestamp(int columnIndex, TimeZone tz) throws SFException {
     ArrowVectorConverter converter = currentChunkIterator.getCurrentConverter(columnIndex - 1);
     int index = currentChunkIterator.getCurrentRowInRecordBatch();
+    converter.setSessionTimeZone(timeZone);
+    converter.setUseSessionTimezone(useSessionTimezone);
     wasNull = converter.isNull(index);
     return converter.toTimestamp(index, tz);
   }
@@ -475,7 +478,8 @@ public class SFArrowResultSet extends SFBaseResultSet implements DataConversionC
     int index = currentChunkIterator.getCurrentRowInRecordBatch();
     wasNull = converter.isNull(index);
     converter.setTreatNTZAsUTC(treatNTZAsUTC);
-    converter.setUseWallClockTime(useSessionTimezone);
+    converter.setUseSessionTimezone(useSessionTimezone);
+    converter.setSessionTimeZone(timeZone);
     return converter.toObject(index);
   }
 
@@ -485,7 +489,7 @@ public class SFArrowResultSet extends SFBaseResultSet implements DataConversionC
     int index = currentChunkIterator.getCurrentRowInRecordBatch();
     wasNull = converter.isNull(index);
     converter.setSessionTimeZone(timeZone);
-    converter.setUseWallClockTime(useSessionTimezone);
+    converter.setUseSessionTimezone(useSessionTimezone);
     return converter.toBigDecimal(index);
   }
 

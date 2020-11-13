@@ -16,9 +16,9 @@ public interface ArrowVectorConverter {
   /**
    * Set to true when time value should be displayed in wallclock time (no timezone offset)
    *
-   * @param useWallClockTime
+   * @param useSessionTimezone
    */
-  void setUseWallClockTime(boolean useWallClockTime);
+  void setUseSessionTimezone(boolean useSessionTimezone);
 
   void setSessionTimeZone(TimeZone tz);
 

@@ -3,14 +3,20 @@
  */
 package net.snowflake.client.jdbc;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests SnowflakeTimestampNTZAsUTC to ensure the output is not impacted by Day Light Saving Time.
@@ -75,7 +81,8 @@ public class SnowflakeTimestampNTZAsUTCTest extends BaseJDBCTest {
     TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
     LocalDateTime dt = parseTimestampNTZ(this.inputTimestamp);
     SnowflakeTimestampNTZAsUTC stn =
-        new SnowflakeTimestampNTZAsUTC(dt.toEpochSecond(ZoneOffset.UTC) * 1000, dt.getNano());
+        new SnowflakeTimestampNTZAsUTC(
+            dt.toEpochSecond(ZoneOffset.UTC) * 1000, dt.getNano(), TimeZone.getTimeZone("UTC"));
     assertEquals(this.outputTimestamp, stn.toString());
   }
 }

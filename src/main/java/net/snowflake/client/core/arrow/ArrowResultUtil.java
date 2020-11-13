@@ -4,11 +4,6 @@
 
 package net.snowflake.client.core.arrow;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.TimeZone;
 import net.snowflake.client.core.IncidentUtil;
 import net.snowflake.client.core.ResultUtil;
 import net.snowflake.client.core.SFException;
@@ -18,6 +13,12 @@ import net.snowflake.client.log.ArgSupplier;
 import net.snowflake.client.log.SFLogger;
 import net.snowflake.client.log.SFLoggerFactory;
 import net.snowflake.common.core.CalendarCache;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /** Result utility methods specifically for Arrow format */
 public class ArrowResultUtil {
@@ -164,7 +165,7 @@ public class ArrowResultUtil {
       seconds--;
       fraction += 1000000000;
     }
-    return createTimestamp(seconds, fraction, false);
+    return createTimestamp(seconds, fraction, TimeZone.getDefault(), false);
   }
 
   /**
@@ -185,20 +186,20 @@ public class ArrowResultUtil {
    *
    * @param seconds
    * @param fraction
-   * @param timeZoneUTC - whether or not timezone should be changed to UTC before creating Timestamp
-   *     object. Necessary for NTZ types
+   * @param timezone - The timezone being used for the toString() formatting
+   * @param timezone -
    * @return java timestamp object
    */
-  public static Timestamp createTimestamp(long seconds, int fraction, boolean timeZoneUTC) {
+  public static Timestamp createTimestamp(long seconds, int fraction, TimeZone timezone, boolean useSessionTz) {
     // If JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true, set timezone to UTC to get
     // timestamp object. This will avoid moving the timezone and creating
     // daylight savings offset errors.
-    if (timeZoneUTC) {
-      return new SnowflakeTimestampNTZAsUTC(seconds * ArrowResultUtil.powerOfTen(3), fraction);
-    } else {
-      Timestamp ts = new Timestamp(seconds * ArrowResultUtil.powerOfTen(3));
-      ts.setNanos(fraction);
-      return ts;
+    if (useSessionTz)
+    {
+      return new SnowflakeTimestampNTZAsUTC(seconds * ArrowResultUtil.powerOfTen(3), fraction, timezone);
     }
+    Timestamp ts = new Timestamp(seconds * ArrowResultUtil.powerOfTen(3));
+    ts.setNanos(fraction);
+    return ts;
   }
 }

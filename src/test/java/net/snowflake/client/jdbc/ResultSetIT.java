@@ -47,17 +47,19 @@ public class ResultSetIT extends ResultSet0IT {
   {
     Connection connection = init();
     Statement statement = connection.createStatement();
-    TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     System.out.println(TimeZone.getDefault());
+    statement.execute("alter session set jdbc_query_result_format = 'json'");
+    statement.execute("alter session set JDBC_SET_SESSION_TIMEZONE=false");
     statement.execute("alter session set timezone = 'America/Los_Angeles'");
     statement.execute("create or replace table datetime(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz)");
     statement.execute("insert into datetime values ('2019-01-01 17:17:17', '2019-01-01 17:17:17', '2019-01-01 17:17:17')");
     ResultSet rs = statement.executeQuery("select * from datetime");
     rs.next();
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX");
-    System.out.println(formatter.format(rs.getTimestamp("COLA")));
-    System.out.println(formatter.format(rs.getTimestamp("COLB")));
-    System.out.println(formatter.format(rs.getTimestamp("COLC")));
+    System.out.println(rs.getTimestamp("COLA"));
+    System.out.println(rs.getTimestamp("COLB"));
+    System.out.println(rs.getTimestamp("COLC"));
   }
 
   @Test

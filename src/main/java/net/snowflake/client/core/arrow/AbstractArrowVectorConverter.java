@@ -3,16 +3,17 @@
  */
 package net.snowflake.client.core.arrow;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.TimeZone;
 import net.snowflake.client.core.DataConversionContext;
 import net.snowflake.client.core.SFException;
 import net.snowflake.client.jdbc.ErrorCode;
 import net.snowflake.client.jdbc.SnowflakeUtil;
 import org.apache.arrow.vector.ValueVector;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.TimeZone;
 
 /**
  * Abstract class of arrow vector converter. For most types, throw invalid convert error. It depends
@@ -34,7 +35,7 @@ abstract class AbstractArrowVectorConverter implements ArrowVectorConverter {
 
   protected boolean treatNTZasUTC;
 
-  protected boolean useWallClockTime;
+  protected boolean useSessionTimezone;
 
   protected TimeZone sessionTimeZone;
 
@@ -152,8 +153,8 @@ abstract class AbstractArrowVectorConverter implements ArrowVectorConverter {
   }
 
   @Override
-  public void setUseWallClockTime(boolean useWallClockTime) {
-    this.useWallClockTime = useWallClockTime;
+  public void setUseSessionTimezone(boolean useSessionTimezone) {
+    this.useSessionTimezone = useSessionTimezone;
   }
 
   @Override
