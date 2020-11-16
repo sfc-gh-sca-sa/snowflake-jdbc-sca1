@@ -49,8 +49,8 @@ public class ResultSetIT extends ResultSet0IT {
     Statement statement = connection.createStatement();
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     System.out.println(TimeZone.getDefault());
-    statement.execute("alter session set jdbc_query_result_format = 'json'");
-    statement.execute("alter session set JDBC_SET_SESSION_TIMEZONE=false");
+    statement.execute("alter session set jdbc_query_result_format = 'arrow'");
+    statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=true");
     statement.execute("alter session set timezone = 'America/Los_Angeles'");
     statement.execute("create or replace table datetime(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz)");
     statement.execute("insert into datetime values ('2019-01-01 17:17:17', '2019-01-01 17:17:17', '2019-01-01 17:17:17')");

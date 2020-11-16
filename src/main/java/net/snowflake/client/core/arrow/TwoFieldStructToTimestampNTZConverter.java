@@ -90,14 +90,13 @@ public class TwoFieldStructToTimestampNTZConverter extends AbstractArrowVectorCo
       }
     }
     Timestamp ts;
-    if (this.treatNTZasUTC)
+    if (this.treatNTZasUTC || this.useSessionTimezone)
     {
       ts = ArrowResultUtil.createTimestamp(epoch, fraction, TimeZone.getTimeZone("UTC"), true);
-
     }
     else
     {
-      ts = ArrowResultUtil.createTimestamp(epoch, fraction, sessionTimeZone, useSessionTimezone);
+      ts = ArrowResultUtil.createTimestamp(epoch, fraction, sessionTimeZone, false);
     }
 
     // Note: honorClientTZForTimestampNTZ is not enabled for toString method
