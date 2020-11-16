@@ -25,6 +25,8 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.TimeZone;
 
 /** Abstract class used to represent snowflake result set in json format */
@@ -420,8 +422,18 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       if (ts == null) {
         return null;
       }
-      return new SnowflakeTimeAsWallclock(
-          ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone());
+      if (resultSetMetaData.getInternalColumnType(columnIndex) == SnowflakeUtil.EXTRA_TYPES_TIMESTAMP_LTZ ||
+              resultSetMetaData.getInternalColumnType(columnIndex) == SnowflakeUtil.EXTRA_TYPES_TIMESTAMP_TZ)
+      {
+        ZoneOffset offset = ZoneId.of(timeZone.getID()).getRules().getOffset(ts.toInstant());
+        return new SnowflakeTimeAsWallclock(
+                ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone(), offset);
+      }
+      else
+      {
+        return new SnowflakeTimeAsWallclock(
+                ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone());
+      }
     } else {
       throw new SFException(
           ErrorCode.INVALID_VALUE_CONVERT,
@@ -645,7 +657,7 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       if (tz == null) {
         tz = TimeZone.getDefault();
       }
-      return new Date(getTimestamp(columnIndex, tz).getTime());
+      return new Date(getTimestamp(columnIndex, TimeZone.getTimeZone("UTC")).getTime());
     } else if (Types.DATE == columnType) {
       if (tz == null || !resultSetSerializable.getFormatDateWithTimeZone()) {
         return ArrowResultUtil.getDate(Integer.parseInt((String) obj));

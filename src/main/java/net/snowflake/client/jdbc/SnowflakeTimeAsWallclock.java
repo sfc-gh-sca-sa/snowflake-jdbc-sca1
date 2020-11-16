@@ -9,11 +9,17 @@ public class SnowflakeTimeAsWallclock extends Time {
 
   int nanos = 0;
   boolean useWallclockTime = false;
+  ZoneOffset offset = ZoneOffset.UTC;
 
   public SnowflakeTimeAsWallclock(long time, int nanos, boolean useWallclockTime) {
     super(time);
     this.nanos = nanos;
     this.useWallclockTime = useWallclockTime;
+  }
+
+  public SnowflakeTimeAsWallclock(long time, int nanos, boolean useWallclockTime, ZoneOffset offset) {
+    this(time, nanos, useWallclockTime);
+    this.offset = offset;
   }
 
   /**
@@ -46,7 +52,7 @@ public class SnowflakeTimeAsWallclock extends Time {
     }
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(baseFormat);
     LocalDateTime ldt =
-        LocalDateTime.ofEpochSecond(this.getTime() / 1000, this.nanos, ZoneOffset.UTC);
+        LocalDateTime.ofEpochSecond(this.getTime() / 1000, this.nanos, this.offset);
     return ldt.format(formatter);
   }
 }

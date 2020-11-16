@@ -57,9 +57,9 @@ public class ResultSetIT extends ResultSet0IT {
     ResultSet rs = statement.executeQuery("select * from datetime");
     rs.next();
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX");
-    System.out.println(rs.getTime("COLA"));
-    System.out.println(rs.getTime("COLB"));
-    System.out.println(rs.getTime("COLC"));
+    System.out.println(rs.getDate("COLA"));
+    System.out.println(rs.getDate("COLB"));
+    System.out.println(rs.getDate("COLC"));
   }
 
   @Test
