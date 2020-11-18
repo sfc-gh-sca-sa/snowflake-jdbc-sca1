@@ -3,11 +3,9 @@
  */
 package net.snowflake.client.jdbc;
 
-import net.snowflake.client.ConditionalIgnoreRule;
-import net.snowflake.client.RunningOnGithubAction;
-import net.snowflake.client.category.TestCategoryResultSet;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,13 +13,13 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.TimeZone;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import net.snowflake.client.ConditionalIgnoreRule;
+import net.snowflake.client.RunningOnGithubAction;
+import net.snowflake.client.category.TestCategoryResultSet;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /** Test ResultSet */
 @Category(TestCategoryResultSet.class)
@@ -43,23 +41,39 @@ public class ResultSetIT extends ResultSet0IT {
   }
 
   @Test
-  public void testTimeOffsets() throws SQLException
-  {
+  public void testTimeOffsets() throws SQLException {
     Connection connection = init();
     Statement statement = connection.createStatement();
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     System.out.println(TimeZone.getDefault());
     statement.execute("alter session set jdbc_query_result_format = 'json'");
-    statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=true");
+    statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=false");
     statement.execute("alter session set timezone = 'America/Los_Angeles'");
-    statement.execute("create or replace table datetime(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz)");
-    statement.execute("insert into datetime values ('2019-01-01 17:17:17', '2019-01-01 17:17:17', '2019-01-01 17:17:17')");
+    statement.execute(
+        "create or replace table datetime(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz, colD time, colE date)");
+    statement.execute(
+        "insert into datetime values ('2019-01-01 17:17:17', '2019-01-01 17:17:17', '2019-01-01 17:17:17', '17:17:17', '2019-01-01')");
     ResultSet rs = statement.executeQuery("select * from datetime");
     rs.next();
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX");
+    // GetDate (doesn't work with Time object)
+    System.out.println("GET DATE");
     System.out.println(rs.getDate("COLA"));
     System.out.println(rs.getDate("COLB"));
     System.out.println(rs.getDate("COLC"));
+    System.out.println(rs.getDate("COLE"));
+    // GetTime (doesn't work with Date object)
+    System.out.println("GET TIME");
+    System.out.println(rs.getTime("COLA"));
+    System.out.println(rs.getTime("COLB"));
+    System.out.println(rs.getTime("COLC"));
+    System.out.println(rs.getTime("COLD"));
+    // GetTimestamp (works with all!)
+    System.out.println("GET TIMESTAMP");
+    System.out.println(rs.getTimestamp("COLA"));
+    System.out.println(rs.getTimestamp("COLB"));
+    System.out.println(rs.getTimestamp("COLC"));
+    System.out.println(rs.getTimestamp("COLD"));
+    System.out.println(rs.getTimestamp("COLE"));
   }
 
   @Test

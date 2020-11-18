@@ -15,7 +15,7 @@ import java.util.TimeZone;
 public class SnowflakeTimestampNTZAsUTC extends Timestamp {
   private static final long serialVersionUID = 1L;
 
-  private TimeZone timezone = TimeZone.getDefault();
+  private TimeZone timezone = TimeZone.getTimeZone("UTC");
 
   public SnowflakeTimestampNTZAsUTC(long seconds, int nanoseconds, TimeZone timezone) {
     super(seconds);
@@ -25,6 +25,10 @@ public class SnowflakeTimestampNTZAsUTC extends Timestamp {
 
   public SnowflakeTimestampNTZAsUTC(Timestamp ts, TimeZone timezone) {
     this(ts.getTime(), ts.getNanos(), timezone);
+  }
+
+  public SnowflakeTimestampNTZAsUTC(Timestamp ts) {
+    this(ts.getTime(), ts.getNanos(), TimeZone.getTimeZone("UTC"));
   }
 
   /**
@@ -52,8 +56,7 @@ public class SnowflakeTimestampNTZAsUTC extends Timestamp {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(buf.toString());
 
     ZoneOffset offset = ZoneId.of(timezone.getID()).getRules().getOffset(this.toInstant());
-    LocalDateTime ldt =
-        LocalDateTime.ofEpochSecond(this.getTime() / 1000, this.getNanos(), offset);
+    LocalDateTime ldt = LocalDateTime.ofEpochSecond(this.getTime() / 1000, this.getNanos(), offset);
     return ldt.format(formatter);
   }
 }

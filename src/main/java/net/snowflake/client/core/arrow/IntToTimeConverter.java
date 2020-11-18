@@ -61,7 +61,7 @@ public class IntToTimeConverter extends AbstractArrowVectorConverter {
       return new SnowflakeTimeAsWallclock(
           sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS),
           sfTime.getNanosecondsWithinSecond(),
-              useSessionTimezone);
+          useSessionTimezone);
     }
   }
 
