@@ -3,23 +3,6 @@
  */
 package net.snowflake.client.jdbc;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Calendar;
-import java.util.HashMap;
 import net.snowflake.client.category.TestCategoryStatement;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +10,16 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.HashMap;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 @Category(TestCategoryStatement.class)
@@ -109,6 +102,8 @@ public class CallableStatementIT extends BaseJDBCTest {
     rs.next();
     assertEquals(47, rs.getDouble(1), .5);
   }
+
+
 
   @Test
   public void testFeatureNotSupportedException() throws Throwable {

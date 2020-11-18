@@ -3,9 +3,11 @@
  */
 package net.snowflake.client.jdbc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import net.snowflake.client.ConditionalIgnoreRule;
+import net.snowflake.client.RunningOnGithubAction;
+import net.snowflake.client.category.TestCategoryResultSet;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,11 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Properties;
 import java.util.TimeZone;
-import net.snowflake.client.ConditionalIgnoreRule;
-import net.snowflake.client.RunningOnGithubAction;
-import net.snowflake.client.category.TestCategoryResultSet;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 /** Test ResultSet */
 @Category(TestCategoryResultSet.class)
@@ -44,8 +45,9 @@ public class ResultSetIT extends ResultSet0IT {
   public void testTimeOffsets() throws SQLException {
     Connection connection = init();
     Statement statement = connection.createStatement();
-    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    TimeZone.setDefault(TimeZone.getTimeZone("Asia/Singapore"));
     System.out.println(TimeZone.getDefault());
+    //System.setProperty("user.timezone", "Asia/Singapore");
     statement.execute("alter session set jdbc_query_result_format = 'arrow'");
     statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=false");
     statement.execute("alter session set timezone = 'America/Los_Angeles'");

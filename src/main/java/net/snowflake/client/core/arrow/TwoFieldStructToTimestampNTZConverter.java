@@ -3,10 +3,6 @@
  */
 package net.snowflake.client.core.arrow;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.TimeZone;
 import net.snowflake.client.core.DataConversionContext;
 import net.snowflake.client.core.IncidentUtil;
 import net.snowflake.client.core.ResultUtil;
@@ -19,6 +15,12 @@ import org.apache.arrow.vector.BigIntVector;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.ValueVector;
 import org.apache.arrow.vector.complex.StructVector;
+
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
 /** converter from two-field struct (epochs and fraction) to Timestamp_NTZ */
 public class TwoFieldStructToTimestampNTZConverter extends AbstractArrowVectorConverter {
@@ -89,7 +91,7 @@ public class TwoFieldStructToTimestampNTZConverter extends AbstractArrowVectorCo
       }
     }
     Timestamp ts;
-    if (this.treatNTZasUTC || this.useSessionTimezone) {
+    if (this.treatNTZasUTC) {
       ts = ArrowResultUtil.createTimestamp(epoch, fraction, TimeZone.getTimeZone("UTC"), true);
     } else {
       ts = ArrowResultUtil.createTimestamp(epoch, fraction, sessionTimeZone, false);
@@ -124,10 +126,11 @@ public class TwoFieldStructToTimestampNTZConverter extends AbstractArrowVectorCo
 
   @Override
   public Time toTime(int index) throws SFException {
-    Timestamp ts = toTimestamp(index, TimeZone.getDefault());
+    Timestamp ts = toTimestamp(index, sessionTimeZone);
     return ts == null
         ? null
-        : new SnowflakeTimeAsWallclock(ts.getTime(), ts.getNanos(), useSessionTimezone);
+        : new SnowflakeTimeAsWallclock(ts.getTime(), ts.getNanos(), useSessionTimezone,
+            ZoneId.of(sessionTimeZone.getID()).getRules().getOffset(ts.toInstant()));
   }
 
   @Override

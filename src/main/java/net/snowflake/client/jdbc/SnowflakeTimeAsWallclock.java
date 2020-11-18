@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 public class SnowflakeTimeAsWallclock extends Time {
 
@@ -32,6 +33,7 @@ public class SnowflakeTimeAsWallclock extends Time {
     if (!useWallclockTime) {
       return super.toString();
     }
+    TimeZone defaultzone = TimeZone.getDefault();
     int trailingZeros = 0;
     int tmpNanos = this.nanos;
     if (tmpNanos > 0) {
