@@ -6,15 +6,13 @@ package net.snowflake.client.core.arrow;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.ZoneId;
 import java.util.TimeZone;
 import net.snowflake.client.core.DataConversionContext;
 import net.snowflake.client.core.IncidentUtil;
 import net.snowflake.client.core.ResultUtil;
 import net.snowflake.client.core.SFException;
-import net.snowflake.client.jdbc.ErrorCode;
-import net.snowflake.client.jdbc.SnowflakeDateSessionTimezone;
-import net.snowflake.client.jdbc.SnowflakeType;
-import net.snowflake.client.jdbc.SnowflakeUtil;
+import net.snowflake.client.jdbc.*;
 import net.snowflake.common.core.SFTimestamp;
 import org.apache.arrow.vector.BigIntVector;
 import org.apache.arrow.vector.IntVector;
@@ -124,7 +122,13 @@ public class ThreeFieldStructToTimestampTZConverter extends AbstractArrowVectorC
   @Override
   public Time toTime(int index) throws SFException {
     Timestamp ts = toTimestamp(index, TimeZone.getDefault());
-    return ts == null ? null : new Time(ts.getTime());
+    return ts == null
+        ? null
+        : new SnowflakeTimeAsWallclock(
+            ts.getTime(),
+            ts.getNanos(),
+            useSessionTimezone,
+            ZoneId.of(sessionTimeZone.getID()).getRules().getOffset(ts.toInstant()));
   }
 
   @Override
