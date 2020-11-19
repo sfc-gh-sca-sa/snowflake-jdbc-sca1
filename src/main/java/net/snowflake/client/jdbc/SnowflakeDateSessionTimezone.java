@@ -27,7 +27,7 @@ public class SnowflakeDateSessionTimezone extends Date {
     }
     String baseFormat = "yyyy-MM-dd";
     DateFormat formatter = new SimpleDateFormat(baseFormat);
-    formatter.setTimeZone(timezone);
+    formatter.setTimeZone(this.timezone);
     return formatter.format(this);
   }
 }

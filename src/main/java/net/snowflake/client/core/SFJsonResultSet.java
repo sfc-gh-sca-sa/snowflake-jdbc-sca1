@@ -4,17 +4,6 @@
 
 package net.snowflake.client.core;
 
-import net.snowflake.client.core.arrow.ArrowResultUtil;
-import net.snowflake.client.jdbc.*;
-import net.snowflake.client.log.ArgSupplier;
-import net.snowflake.client.log.SFLogger;
-import net.snowflake.client.log.SFLoggerFactory;
-import net.snowflake.common.core.SFBinary;
-import net.snowflake.common.core.SFBinaryFormat;
-import net.snowflake.common.core.SFTime;
-import net.snowflake.common.core.SFTimestamp;
-import org.apache.arrow.vector.Float8Vector;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
@@ -25,6 +14,16 @@ import java.sql.Types;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.TimeZone;
+import net.snowflake.client.core.arrow.ArrowResultUtil;
+import net.snowflake.client.jdbc.*;
+import net.snowflake.client.log.ArgSupplier;
+import net.snowflake.client.log.SFLogger;
+import net.snowflake.client.log.SFLoggerFactory;
+import net.snowflake.common.core.SFBinary;
+import net.snowflake.common.core.SFBinaryFormat;
+import net.snowflake.common.core.SFTime;
+import net.snowflake.common.core.SFTimestamp;
+import org.apache.arrow.vector.Float8Vector;
 
 /** Abstract class used to represent snowflake result set in json format */
 public abstract class SFJsonResultSet extends SFBaseResultSet {
@@ -410,9 +409,11 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       if (sfTime == null) {
         return null;
       }
-      if (resultSetSerializable.getUseSessionTimezone())
-      {
-        return new SnowflakeTimeAsWallclock(sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS), sfTime.getNanosecondsWithinSecond(), resultSetSerializable.getUseSessionTimezone());
+      if (resultSetSerializable.getUseSessionTimezone()) {
+        return new SnowflakeTimeAsWallclock(
+            sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS),
+            sfTime.getNanosecondsWithinSecond(),
+            resultSetSerializable.getUseSessionTimezone());
       }
       return new Time(
           sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS));
@@ -421,15 +422,14 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       if (ts == null) {
         return null;
       }
-      if (resultSetSerializable.getUseSessionTimezone())
-      {
+      if (resultSetSerializable.getUseSessionTimezone()) {
         ts = getTimestamp(columnIndex, resultSetSerializable.getTimeZone());
         ZoneOffset offset =
-                ZoneId.of(resultSetSerializable.getTimeZone().getID())
-                        .getRules()
-                        .getOffset(ts.toInstant());
+            ZoneId.of(resultSetSerializable.getTimeZone().getID())
+                .getRules()
+                .getOffset(ts.toInstant());
         return new SnowflakeTimeAsWallclock(
-                ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone(), offset);
+            ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone(), offset);
       }
       return new Time(ts.getTime());
     } else {
@@ -458,15 +458,8 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
         return null;
       }
       int subType = resultSetMetaData.getInternalColumnType(columnIndex);
-
-      // If timestamp type is NTZ and JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true, keep
-      // timezone in UTC to avoid daylight savings errors
-      if (resultSetSerializable.getTreatNTZAsUTC()
-          && resultSetMetaData.getInternalColumnType(columnIndex) == Types.TIMESTAMP) {
-        res = new SnowflakeTimestampNTZAsUTC(res);
-      }
       // If we want to display format with no session offset, use subtype of timestamp
-      else if (resultSetSerializable.getUseSessionTimezone()) {
+      if (resultSetSerializable.getUseSessionTimezone()) {
         if (subType == SnowflakeUtil.EXTRA_TYPES_TIMESTAMP_LTZ
             || subType == SnowflakeUtil.EXTRA_TYPES_TIMESTAMP_TZ) {
           res = new SnowflakeTimestampNTZAsUTC(res, resultSetSerializable.getTimeZone());
@@ -474,12 +467,18 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
           res = new SnowflakeTimestampNTZAsUTC(res);
         }
       }
+      // If timestamp type is NTZ and JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true, keep
+      // timezone in UTC to avoid daylight savings errors
+      else if (resultSetSerializable.getTreatNTZAsUTC()
+          && resultSetMetaData.getInternalColumnType(columnIndex) == Types.TIMESTAMP) {
+        res = new SnowflakeTimestampNTZAsUTC(res);
+      }
       // If JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=false, default behavior is to honor
       // client timezone for NTZ time. Move NTZ timestamp offset to correspond to
-      // client's timezone
-      if (!resultSetSerializable.getTreatNTZAsUTC()
-          && honorClientTZForTimestampNTZ
-          && resultSetMetaData.getInternalColumnType(columnIndex) == Types.TIMESTAMP) {
+      // client's timezone. JDBC_USE_SESSION_TIMEZONE overrides other params.
+      if (resultSetMetaData.getInternalColumnType(columnIndex) == Types.TIMESTAMP
+          && ((!resultSetSerializable.getTreatNTZAsUTC() && honorClientTZForTimestampNTZ)
+              || resultSetSerializable.getUseSessionTimezone())) {
         res = sfTS.moveToTimeZone(tz).getTimestamp();
       }
       // Adjust time if date happens before year 1582 for difference between
@@ -496,10 +495,12 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       if (t == null) {
         return null;
       }
-      if (resultSetSerializable.getUseSessionTimezone())
-      {
+      if (resultSetSerializable.getUseSessionTimezone()) {
         SFTime sfTime = getSFTime(columnIndex);
-        return new SnowflakeTimestampNTZAsUTC(sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS), sfTime.getNanosecondsWithinSecond(), TimeZone.getTimeZone("UTC"));
+        return new SnowflakeTimestampNTZAsUTC(
+            sfTime.getFractionalSeconds(ResultUtil.DEFAULT_SCALE_OF_SFTIME_FRACTION_SECONDS),
+            sfTime.getNanosecondsWithinSecond(),
+            TimeZone.getTimeZone("UTC"));
       }
       return new Timestamp(t.getTime());
     } else {
@@ -666,10 +667,16 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       if (tz == null) {
         tz = TimeZone.getDefault();
       }
-      return new SnowflakeDateSessionTimezone(
-          getTimestamp(columnIndex, tz).getTime(),
-          timeZone,
-          resultSetSerializable.getUseSessionTimezone());
+      int subType = resultSetMetaData.getInternalColumnType(columnIndex);
+      if (subType == SnowflakeUtil.EXTRA_TYPES_TIMESTAMP_TZ
+          || subType == SnowflakeUtil.EXTRA_TYPES_TIMESTAMP_LTZ) {
+        return new SnowflakeDateSessionTimezone(
+            getTimestamp(columnIndex, tz).getTime(),
+            timeZone,
+            resultSetSerializable.getUseSessionTimezone());
+      }
+      return new Date(getTimestamp(columnIndex, tz).getTime());
+
     } else if (Types.DATE == columnType) {
       if (tz == null || !resultSetSerializable.getFormatDateWithTimeZone()) {
         return ArrowResultUtil.getDate(Integer.parseInt((String) obj));

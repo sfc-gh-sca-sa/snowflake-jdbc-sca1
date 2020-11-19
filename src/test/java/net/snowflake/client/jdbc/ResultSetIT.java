@@ -3,11 +3,9 @@
  */
 package net.snowflake.client.jdbc;
 
-import net.snowflake.client.ConditionalIgnoreRule;
-import net.snowflake.client.RunningOnGithubAction;
-import net.snowflake.client.category.TestCategoryResultSet;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,10 +15,11 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Properties;
 import java.util.TimeZone;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import net.snowflake.client.ConditionalIgnoreRule;
+import net.snowflake.client.RunningOnGithubAction;
+import net.snowflake.client.category.TestCategoryResultSet;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /** Test ResultSet */
 @Category(TestCategoryResultSet.class)
@@ -47,14 +46,17 @@ public class ResultSetIT extends ResultSet0IT {
     Statement statement = connection.createStatement();
     TimeZone.setDefault(TimeZone.getTimeZone("Asia/Singapore"));
     System.out.println(TimeZone.getDefault());
-    //System.setProperty("user.timezone", "Asia/Singapore");
-    statement.execute("alter session set jdbc_query_result_format = 'arrow'");
-    statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=false");
+    // System.setProperty("user.timezone", "Asia/Singapore");
+    statement.execute("alter session set jdbc_query_result_format = 'json'");
+    statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=true");
     statement.execute("alter session set timezone = 'America/Los_Angeles'");
     statement.execute(
         "create or replace table datetime(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz, colD time, colE date)");
     statement.execute(
-        "insert into datetime values ('2019-01-01 17:17:17', '2019-01-01 17:17:17', '2019-01-01 17:17:17', '17:17:17', '2019-01-01')");
+        "insert into datetime values ('2019-01-01 17:17:17.0', '2019-01-01 17:17:17.0', '2019-01-01 17:17:17.0', '17:17:17', '2019-01-01')");
+    // statement.execute(
+    //  "insert into datetime values ('1943-12-31 01:01:33', '1943-12-31 01:01:33', '1943-12-31
+    // 01:01:33', '01:01:33', '1943-12-31')");
     ResultSet rs = statement.executeQuery("select * from datetime");
     rs.next();
     // GetDate (doesn't work with Time object)

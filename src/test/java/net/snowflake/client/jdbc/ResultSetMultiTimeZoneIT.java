@@ -3,6 +3,14 @@
  */
 package net.snowflake.client.jdbc;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
+
+import java.sql.*;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import net.snowflake.client.ConditionalIgnoreRule;
 import net.snowflake.client.RunningOnGithubAction;
 import net.snowflake.client.category.TestCategoryResultSet;
@@ -12,15 +20,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import java.sql.Date;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 
 /** Test ResultSet */
 @RunWith(Parameterized.class)
@@ -45,7 +44,7 @@ public class ResultSetMultiTimeZoneIT extends BaseJDBCTest {
   public ResultSetMultiTimeZoneIT(String queryResultFormat, String timeZone) {
     this.queryResultFormat = queryResultFormat;
     TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
-    //System.setProperty("user.timezone", timeZone);
+    // System.setProperty("user.timezone", timeZone);
   }
 
   public Connection init() throws SQLException {
@@ -126,20 +125,34 @@ public class ResultSetMultiTimeZoneIT extends BaseJDBCTest {
     Statement statement = connection.createStatement();
     // create table with all timestamp types, time, and date
     statement.execute(
-            "create or replace table datetimetypes(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz, colD time, colE date)");
+        "create or replace table datetimetypes(colA timestamp_ltz, colB timestamp_ntz, colC timestamp_tz, colD time, colE date)");
     statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=true");
+    statement.execute("alter session set JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true");
+    statement.execute("alter session set CLIENT_HONOR_CLIENT_TZ_FOR_TIMESTAMP_NTZ=false");
+    statement.execute("alter session set JDBC_FORMAT_DATE_WITH_TIMEZONE=true");
     String expectedTimestamp = "2019-01-01 17:17:17.0";
     String expectedTime = "17:17:17";
     String expectedDate = "2019-01-01";
-    PreparedStatement prepSt = connection.prepareStatement("insert into datetimetypes values(?, ?, ?, ?, ?)");
+    String expectedTimestamp2 = "1943-12-31 01:01:33.0";
+    String expectedTime2 = "01:01:33";
+    String expectedDate2 = "1943-12-31";
+    PreparedStatement prepSt =
+        connection.prepareStatement("insert into datetimetypes values(?, ?, ?, ?, ?)");
     prepSt.setString(1, expectedTimestamp);
     prepSt.setString(2, expectedTimestamp);
     prepSt.setString(3, expectedTimestamp);
     prepSt.setString(4, expectedTime);
     prepSt.setString(5, expectedDate);
     prepSt.execute();
-    //statement.execute(
-      //      "insert into datetimetypes values (" + expectedTimestamp + ", " + expectedTimestamp + ", "+ expectedTimestamp + ", " + expectedTime + ", " + expectedDate + ")");
+    prepSt.setString(1, expectedTimestamp2);
+    prepSt.setString(2, expectedTimestamp2);
+    prepSt.setString(3, expectedTimestamp2);
+    prepSt.setString(4, expectedTime2);
+    prepSt.setString(5, expectedDate2);
+    prepSt.execute();
+    // statement.execute(
+    //      "insert into datetimetypes values (" + expectedTimestamp + ", " + expectedTimestamp + ",
+    // "+ expectedTimestamp + ", " + expectedTime + ", " + expectedDate + ")");
     ResultSet rs = statement.executeQuery("select * from datetimetypes");
     rs.next();
     // Assert date has no offset
@@ -165,13 +178,35 @@ public class ResultSetMultiTimeZoneIT extends BaseJDBCTest {
     assertEquals(expectedTime, rs.getTime("COLD").toString());
     // Cannot getTime() for Date column (colE)
 
+    rs.next();
+    // Assert date has no offset
+    assertEquals(expectedDate2, rs.getDate("COLA").toString());
+    assertEquals(expectedDate2, rs.getDate("COLB").toString());
+    assertEquals(expectedDate2, rs.getDate("COLC").toString());
+    // cannot getDate() for Time column (ColD)
+    assertEquals(expectedDate2, rs.getDate("COLE").toString());
+
+    // Assert timestamp has no offset
+    assertEquals(expectedTimestamp2, rs.getTimestamp("COLA").toString());
+    assertEquals(expectedTimestamp2, rs.getTimestamp("COLB").toString());
+    assertEquals(expectedTimestamp2, rs.getTimestamp("COLC").toString());
+    // Getting timestamp from Time column will default to epoch start date
+    assertEquals("1970-01-01 01:01:33.0", rs.getTimestamp("COLD").toString());
+    // Getting timestamp from Date column will default to wallclock time of 0
+    assertEquals("1943-12-31 00:00:00.0", rs.getTimestamp("COLE").toString());
+
+    // Assert time has no offset
+    assertEquals(expectedTime2, rs.getTime("COLA").toString());
+    assertEquals(expectedTime2, rs.getTime("COLB").toString());
+    assertEquals(expectedTime2, rs.getTime("COLC").toString());
+    assertEquals(expectedTime2, rs.getTime("COLD").toString());
+    // Cannot getTime() for Date column (colE)
+
     // Compare with results when JDBC_USE_SESSION_TIMEZONE=false
     statement.execute("alter session set JDBC_USE_SESSION_TIMEZONE=false");
 
     connection.close();
   }
-
-
 
   @Test
   @ConditionalIgnoreRule.ConditionalIgnore(condition = RunningOnGithubAction.class)
