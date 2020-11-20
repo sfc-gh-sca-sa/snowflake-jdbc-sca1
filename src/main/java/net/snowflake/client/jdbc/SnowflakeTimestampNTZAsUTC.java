@@ -56,9 +56,9 @@ public class SnowflakeTimestampNTZAsUTC extends Timestamp {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(buf.toString());
 
     ZoneOffset offset = ZoneId.of(timezone.getID()).getRules().getOffset(this.toInstant());
-    long time = this.getTime();
-    long dividedtime = time/1000;
-    LocalDateTime ldt = LocalDateTime.ofEpochSecond(this.getTime() / 1000 -1, this.getNanos(), offset);
+    LocalDateTime ldt =
+        LocalDateTime.ofEpochSecond(
+            SnowflakeUtil.getSecondsFromMillis(this.getTime()), this.getNanos(), offset);
     return ldt.format(formatter);
   }
 }

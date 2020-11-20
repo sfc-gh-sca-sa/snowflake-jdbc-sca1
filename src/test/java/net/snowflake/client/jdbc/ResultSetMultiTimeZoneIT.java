@@ -130,7 +130,7 @@ public class ResultSetMultiTimeZoneIT extends BaseJDBCTest {
     statement.execute("alter session set JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true");
     statement.execute("alter session set CLIENT_HONOR_CLIENT_TZ_FOR_TIMESTAMP_NTZ=false");
     statement.execute("alter session set JDBC_FORMAT_DATE_WITH_TIMEZONE=true");
-    String expectedTimestamp = "2019-01-01 17:17:17.0";
+    String expectedTimestamp = "2019-01-01 17:17:17.6";
     String expectedTime = "17:17:17";
     String expectedDate = "2019-01-01";
     String expectedTimestamp2 = "1943-12-31 01:01:33.0";
