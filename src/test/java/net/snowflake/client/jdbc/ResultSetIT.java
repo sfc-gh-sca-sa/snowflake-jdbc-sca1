@@ -10,6 +10,7 @@ import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Properties;
@@ -38,8 +39,7 @@ public class ResultSetIT extends ResultSet0IT {
     super(queryResultFormat);
   }
 
-  /*
-  @Test
+  /*@Test
   public void testTimeOffsets() throws SQLException {
     Connection connection = init();
     Statement statement = connection.createStatement();
@@ -77,8 +77,7 @@ public class ResultSetIT extends ResultSet0IT {
     System.out.println(rs.getTimestamp("COLC"));
     System.out.println(rs.getTimestamp("COLD"));
     System.out.println(rs.getTimestamp("COLE"));
-  }
-   */
+  }*/
 
   @Test
   public void testFindColumn() throws SQLException {
