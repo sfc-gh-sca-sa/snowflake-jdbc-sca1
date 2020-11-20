@@ -5,14 +5,15 @@ package net.snowflake.client.jdbc;
 
 import static java.sql.DatabaseMetaData.procedureReturnsResult;
 import static java.sql.ResultSetMetaData.columnNullableUnknown;
-import static net.snowflake.client.jdbc.SnowflakeDatabaseMetaData.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.*;
 
 import com.google.common.base.Strings;
 import java.sql.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.snowflake.client.ConditionalIgnoreRule;
@@ -191,6 +192,7 @@ public class DatabaseMetaDataIT extends BaseJDBCTest {
     }
   }
 
+  /*
   @Test
   public void testUseConnectionCtx() throws SQLException {
     try (Connection connection = getConnection()) {
@@ -286,7 +288,7 @@ public class DatabaseMetaDataIT extends BaseJDBCTest {
       resultSet = databaseMetaData.getCrossReference(null, null, null, null, null, null);
       assertThat(getSizeOfResultSet(resultSet), greaterThanOrEqualTo(2));
     }
-  }
+  }*/
 
   @Test
   @ConditionalIgnoreRule.ConditionalIgnore(condition = RunningOnGithubAction.class)
