@@ -1,9 +1,12 @@
 package net.snowflake.client.jdbc;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 public class SnowflakeTimeAsWallclock extends Time {
 
@@ -18,9 +21,13 @@ public class SnowflakeTimeAsWallclock extends Time {
   }
 
   public SnowflakeTimeAsWallclock(
-      long time, int nanos, boolean useWallclockTime, ZoneOffset offset) {
-    this(time, nanos, useWallclockTime);
-    this.offset = offset;
+      Timestamp ts, TimeZone sessionTimeZone, boolean useWallclockTime) {
+    super(ts.getTime());
+    this.nanos = ts.getNanos();
+    this.useWallclockTime = useWallclockTime;
+    if (sessionTimeZone != null) {
+      this.offset = ZoneId.of(sessionTimeZone.getID()).getRules().getOffset(ts.toInstant());
+    }
   }
 
   /**

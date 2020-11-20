@@ -11,8 +11,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.TimeZone;
 import net.snowflake.client.core.arrow.ArrowResultUtil;
 import net.snowflake.client.jdbc.*;
@@ -424,12 +422,8 @@ public abstract class SFJsonResultSet extends SFBaseResultSet {
       }
       if (resultSetSerializable.getUseSessionTimezone()) {
         ts = getTimestamp(columnIndex, resultSetSerializable.getTimeZone());
-        ZoneOffset offset =
-            ZoneId.of(resultSetSerializable.getTimeZone().getID())
-                .getRules()
-                .getOffset(ts.toInstant());
         return new SnowflakeTimeAsWallclock(
-            ts.getTime(), ts.getNanos(), resultSetSerializable.getUseSessionTimezone(), offset);
+            ts, resultSetSerializable.getTimeZone(), resultSetSerializable.getUseSessionTimezone());
       }
       return new Time(ts.getTime());
     } else {

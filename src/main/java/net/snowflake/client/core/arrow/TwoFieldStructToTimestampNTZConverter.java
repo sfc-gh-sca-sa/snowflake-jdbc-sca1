@@ -6,7 +6,6 @@ package net.snowflake.client.core.arrow;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.ZoneId;
 import java.util.TimeZone;
 import net.snowflake.client.core.DataConversionContext;
 import net.snowflake.client.core.IncidentUtil;
@@ -133,11 +132,7 @@ public class TwoFieldStructToTimestampNTZConverter extends AbstractArrowVectorCo
     }
     return ts == null
         ? null
-        : new SnowflakeTimeAsWallclock(
-            ts.getTime(),
-            ts.getNanos(),
-            useSessionTimezone,
-            ZoneId.of(sessionTimeZone.getID()).getRules().getOffset(ts.toInstant()));
+        : new SnowflakeTimeAsWallclock(ts, sessionTimeZone, useSessionTimezone);
   }
 
   @Override
