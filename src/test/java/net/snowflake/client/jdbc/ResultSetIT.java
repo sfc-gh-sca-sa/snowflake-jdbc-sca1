@@ -10,11 +10,9 @@ import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Properties;
-import java.util.TimeZone;
 import net.snowflake.client.ConditionalIgnoreRule;
 import net.snowflake.client.RunningOnGithubAction;
 import net.snowflake.client.category.TestCategoryResultSet;
@@ -40,6 +38,7 @@ public class ResultSetIT extends ResultSet0IT {
     super(queryResultFormat);
   }
 
+  /*
   @Test
   public void testTimeOffsets() throws SQLException {
     Connection connection = init();
@@ -79,6 +78,7 @@ public class ResultSetIT extends ResultSet0IT {
     System.out.println(rs.getTimestamp("COLD"));
     System.out.println(rs.getTimestamp("COLE"));
   }
+   */
 
   @Test
   public void testFindColumn() throws SQLException {
